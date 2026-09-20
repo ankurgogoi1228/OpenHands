@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Target success rate (\%) under the bottom attack (80 truthful + 20 manipulators, 2,000 trials per cell).}
+  \label{tab:sim1-bottom-success}
+  \begin{tabular}{@{}llS[table-format=3.2]S[table-format=3.2]S[table-format=3.2]@{}}
+    \toprule
+    & & \multicolumn{3}{c}{Committee size $k$} \\
+    \cmidrule(lr){3-5}
+    Culture & Rule & {$k=2$} & {$k=3$} & {$k=4$} \\
+    \midrule
+    \multirow{3}{*}{Mallows ($\varphi=0.7$)} & Evaluative & 51.35 & 93.25 & 99.80 \\
+    & $k$-Median & 2.30 & 43.80 & 59.05 \\
+    & $k$-Median-Shapley & 0.00 & 15.60 & 50.75 \\
+    \midrule
+    \multirow{3}{*}{Plackett--Luce} & Evaluative & 30.55 & 53.00 & 78.55 \\
+    & $k$-Median & 21.45 & 39.35 & 64.70 \\
+    & $k$-Median-Shapley & 1.55 & 12.25 & 35.70 \\
+    \midrule
+    \multirow{3}{*}{2D Euclidean} & Evaluative & 98.40 & 99.75 & 100.00 \\
+    & $k$-Median & 55.90 & 73.65 & 85.55 \\
+    & $k$-Median-Shapley & 19.45 & 42.40 & 66.10 \\
+    \midrule
+    \multirow{3}{*}{IAC} & Evaluative & 63.65 & 84.75 & 96.90 \\
+    & $k$-Median & 36.80 & 55.00 & 79.70 \\
+    & $k$-Median-Shapley & 15.05 & 34.00 & 65.20 \\
+    \midrule
+    \multirow{3}{*}{P\'olya Urn ($\alpha=0.2$)} & Evaluative & 55.35 & 80.15 & 94.85 \\
+    & $k$-Median & 37.20 & 54.60 & 77.35 \\
+    & $k$-Median-Shapley & 17.85 & 38.35 & 64.65 \\
+    \midrule
+    \multirow{3}{*}{Impartial Culture} & Evaluative & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 97.55 & 98.10 & 99.45 \\
+    & $k$-Median-Shapley & 87.25 & 95.25 & 98.75 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

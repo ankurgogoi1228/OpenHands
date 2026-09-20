@@ -1,7 +1,0 @@
-Target,Rule,Change_Rate,Success_Rate,Avg_Overlap
-Bottom,Evaluative Voting,73.038,73.038,0.673
-Bottom,k-Median Rule,62.973,50.171,0.684
-Bottom,k-Median-Shapley,46.517,33.142,0.774
-Cutoff,Evaluative Voting,97.654,97.654,0.489
-Cutoff,k-Median Rule,76.96,76.96,0.592
-Cutoff,k-Median-Shapley,62.402,60.452,0.672

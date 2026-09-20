@@ -1,0 +1,19 @@
+Culture,Rule,2,3,4
+2D Euclidean,Evaluative Voting,98.4,99.75,100.0
+2D Euclidean,k-Median Rule,76.15,84.5,85.55
+2D Euclidean,k-Median-Shapley,47.75,59.95,66.1
+Impartial Anonymous Culture (IAC),Evaluative Voting,63.65,84.75,96.9
+Impartial Anonymous Culture (IAC),k-Median Rule,64.3,71.3,79.7
+Impartial Anonymous Culture (IAC),k-Median-Shapley,38.4,47.05,65.2
+Impartial Culture (IC),Evaluative Voting,100.0,100.0,100.0
+Impartial Culture (IC),k-Median Rule,99.05,99.05,99.45
+Impartial Culture (IC),k-Median-Shapley,93.1,96.95,98.75
+Mallows (phi=0.7),Evaluative Voting,51.35,93.25,99.8
+Mallows (phi=0.7),k-Median Rule,6.6,44.7,59.05
+Mallows (phi=0.7),k-Median-Shapley,8.25,21.45,50.75
+Plackett-Luce,Evaluative Voting,30.55,53.0,78.55
+Plackett-Luce,k-Median Rule,48.15,54.3,64.7
+Plackett-Luce,k-Median-Shapley,18.15,21.5,35.7
+Polya Urn (alpha=0.2),Evaluative Voting,55.35,80.15,94.85
+Polya Urn (alpha=0.2),k-Median Rule,63.6,71.05,77.35
+Polya Urn (alpha=0.2),k-Median-Shapley,46.55,57.45,64.65

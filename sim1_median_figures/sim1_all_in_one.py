@@ -39,10 +39,16 @@ GRADE COVERAGE (two models needed a fix)
     maximum distance realised in the trial, so grade 0 is always attained and the whole
     scale {0,...,5} is used. EUCLIDEAN_SCALE = "sqrt2" restores the paper's exact formula.
 
+Committee sizes
+---------------
+    k = 2, 3, 4 only. k = 1 is a single winner rather than a committee, and k = 5 is the
+    full candidate set (every rule then selects every candidate), so both are excluded.
+    The simulation, all six figures and all tables use the same k = 2, 3, 4.
+
 Command line
 ------------
     python sim1_median_committee.py                       # full run, k in {2,3,4}
-    python sim1_median_committee.py --k 1,2,3,4           # main figures over every k
+    python sim1_median_committee.py --k 2,3                # subset of committee sizes
     python sim1_median_committee.py --trials 500          # quick test run
     python sim1_median_committee.py --skip-simulation     # re-plot an existing CSV
     python sim1_median_committee.py --skip-figures        # data only
@@ -89,7 +95,11 @@ NUM_ITERATIONS = 2000      # trials per cell      (paper-mirror: 50000)
 M = 5                      # number of candidates
 SCALE_MAX = 5              # integer scale {0,1,2,3,4,5}
 TOTAL_N = N_HONEST + N_MANIP
-COMMITTEE_SIZES = [1, 2, 3, 4]     # k <= m - 1
+
+# Committee sizes. k = 1 is a single winner, not a committee, so it is excluded: a
+# committee needs at least two members. The upper bound is k <= m - 1 = 4, otherwise the
+# whole candidate set is always selected and every rule degenerates into "take everyone".
+COMMITTEE_SIZES = [2, 3, 4]
 
 # Strict integer rank -> score map (contains grade 3; worst-ranked gets 0)
 RANK_TO_SCORE = np.array([5, 4, 3, 2, 0], dtype=int)
@@ -711,68 +721,69 @@ def export_tables(df, tables_dir):
     print(agg)
 
 
-def render_figures(df, base_dir, graphs_dir, tables_dir, main_k):
-    """Main figures for `main_k` (paper setting), appendix figures for every simulated k."""
+def render_figures(df, base_dir, graphs_dir, tables_dir, k_sizes):
+    """All six figures are written into the SAME folder (graphs_dir), each as PNG + PDF.
+
+    Every figure and every table uses the same committee sizes, k = 2, 3, 4.
+    """
     n_honest = int(df["n_honest"].iloc[0])
     n_manip = int(df["n_manip"].iloc[0])
     trials = int(df["trials"].iloc[0])
     context = (f"{n_honest} truthful + {n_manip} manipulators, "
                f"{trials:,} trials per cell")
 
-    main_df = df[df["k"].isin(main_k)]
-    appendix_k = sorted(df["k"].unique().tolist())
+    main_df = df[df["k"].isin(k_sizes)]
 
-    print(f"\n[*] Rendering main figures for k in {{{', '.join(map(str, main_k))}}}  ({context})")
-    print(f"[*] Output: {graphs_dir}\n")
+    print(f"\n[*] Rendering figures for k in {{{', '.join(map(str, k_sizes))}}}  ({context})")
+    print(f"[*] ALL figures go to one folder: {graphs_dir}\n")
 
-    panel_grid(main_df, "Change_Rate", "Cutoff", main_k,
+    panel_grid(main_df, "Change_Rate", "Cutoff", k_sizes,
                "Committee change rate (%)", (0, 104),
                os.path.join(graphs_dir, "sim1_cutoff_change_rate.png"),
                os.path.join(graphs_dir, "sim1_cutoff_change_rate.pdf"),
                f"Cutoff attack: committee change rate vs $k$  ({context})")
 
-    panel_grid(main_df, "Avg_Overlap", "Cutoff", main_k,
+    panel_grid(main_df, "Avg_Overlap", "Cutoff", k_sizes,
                "Average overlap with initial committee", (0, 1.02),
                os.path.join(graphs_dir, "sim1_overlap_cutoff.png"),
                os.path.join(graphs_dir, "sim1_overlap_cutoff.pdf"),
                f"Cutoff attack: average overlap vs $k$  ({context})")
 
-    panel_grid(main_df, "Change_Rate", "Bottom", main_k,
+    panel_grid(main_df, "Change_Rate", "Bottom", k_sizes,
                "Rate (%)", (0, 104),
                os.path.join(graphs_dir, "sim1_bottom_change_and_success.png"),
                os.path.join(graphs_dir, "sim1_bottom_change_and_success.pdf"),
                f"Bottom attack: committee change rate and target success rate vs $k$  ({context})",
                dual_metric=True)
 
-    aggregate_figure(main_df, main_k, "Committee change rate (%)", (0, 104),
+    aggregate_figure(main_df, k_sizes, "Committee change rate (%)", (0, 104),
                      os.path.join(graphs_dir, "sim1_aggregate_comparison.png"),
                      os.path.join(graphs_dir, "sim1_aggregate_comparison.pdf"),
                      f"Mean over the six preference models ({context})")
 
-    appendix_dir = os.path.join(graphs_dir, "appendix")
-    os.makedirs(appendix_dir, exist_ok=True)
-    print(f"\n[*] Rendering appendix figures for k in {{{', '.join(map(str, appendix_k))}}}")
-    panel_grid(df, "Success_Rate", "Cutoff", appendix_k,
+    print(f"\n[*] Rendering the remaining figures for k in {{{', '.join(map(str, k_sizes))}}} "
+          f"(same folder)")
+    panel_grid(main_df, "Success_Rate", "Cutoff", k_sizes,
                "Target success rate (%)", (0, 104),
-               os.path.join(appendix_dir, "sim1_cutoff_success_rate.png"),
-               os.path.join(appendix_dir, "sim1_cutoff_success_rate.pdf"),
+               os.path.join(graphs_dir, "sim1_cutoff_success_rate.png"),
+               os.path.join(graphs_dir, "sim1_cutoff_success_rate.pdf"),
                f"Cutoff attack: target success rate vs $k$  ({context})")
-    panel_grid(df, "Change_Rate", "Bottom", appendix_k,
+    panel_grid(main_df, "Change_Rate", "Bottom", k_sizes,
                "Committee change rate (%)", (0, 104),
-               os.path.join(appendix_dir, "sim1_bottom_change_rate.png"),
-               os.path.join(appendix_dir, "sim1_bottom_change_rate.pdf"),
+               os.path.join(graphs_dir, "sim1_bottom_change_rate.png"),
+               os.path.join(graphs_dir, "sim1_bottom_change_rate.pdf"),
                f"Bottom attack: committee change rate only vs $k$  ({context})")
 
     print("\n[*] Exporting LaTeX tables...")
-    latex_table(df, "Change_Rate", "Cutoff", appendix_k,
+    latex_table(main_df, "Change_Rate", "Cutoff", k_sizes,
                 f"Committee change rate (\\%) under the cutoff attack ({context}).",
                 "tab:sim1-cutoff-change",
                 os.path.join(tables_dir, "sim1_table_cutoff_change_rate.tex"))
-    latex_table(df, "Change_Rate", "Bottom", appendix_k,
+    latex_table(main_df, "Change_Rate", "Bottom", k_sizes,
                 f"Committee change rate (\\%) under the bottom attack ({context}).",
                 "tab:sim1-bottom-change",
                 os.path.join(tables_dir, "sim1_table_bottom_change_rate.tex"))
-    latex_table(df, "Success_Rate", "Bottom", appendix_k,
+    latex_table(main_df, "Success_Rate", "Bottom", k_sizes,
                 f"Target success rate (\\%) under the bottom attack ({context}).",
                 "tab:sim1-bottom-success",
                 os.path.join(tables_dir, "sim1_table_bottom_success_rate.tex"))
@@ -785,7 +796,8 @@ def main():
     ap = argparse.ArgumentParser(description="Simulation 1: median-based committee selection "
                                              "(simulation + tables + figures in one file).")
     ap.add_argument("--k", default="2,3,4",
-                    help="committee sizes for the MAIN figures (default 2,3,4; app 1,2,3,4)")
+                    help="committee sizes (default 2,3,4). k=1 is a single winner, not a "
+                         "committee, and k=5 selects every candidate, so both are excluded")
     ap.add_argument("--trials", type=int, default=None, help="override NUM_ITERATIONS")
     ap.add_argument("--honest", type=int, default=None, help="override N_HONEST")
     ap.add_argument("--manip", type=int, default=None, help="override N_MANIP")
@@ -802,11 +814,11 @@ def main():
     if args.trials is not None:
         NUM_ITERATIONS = args.trials
     TOTAL_N = N_HONEST + N_MANIP
-    main_k = [int(v) for v in args.k.split(",")]
+    k_sizes = [int(v) for v in args.k.split(",")]
 
     print("=" * 80)
-    print(f"SIMULATION 1 (all-in-one): m={M}, k<=4, total n={TOTAL_N} "
-          f"({N_HONEST} truthful + {N_MANIP} manipulators)")
+    print(f"SIMULATION 1 (all-in-one): m={M}, k in {{{','.join(map(str, k_sizes))}}}, "
+          f"total n={TOTAL_N} ({N_HONEST} truthful + {N_MANIP} manipulators)")
     print(f"Trials per cell = {NUM_ITERATIONS}  |  INTEGER_MEDIAN = {INTEGER_MEDIAN}")
     print(f"Rank -> Score map = {RANK_TO_SCORE.tolist()}  (Plackett-Luce uses "
           f"{PL_RANK_TO_SCORE.tolist()})")
@@ -831,7 +843,7 @@ def main():
     export_tables(df, tables_dir)
 
     if not args.skip_figures:
-        render_figures(df, base_dir, graphs_dir, tables_dir, main_k)
+        render_figures(df, base_dir, graphs_dir, tables_dir, k_sizes)
         print("\n[*] Done. PNG (300 dpi) and PDF (vector) versions were written.")
     else:
         print("\n[*] Done (figures skipped).")
