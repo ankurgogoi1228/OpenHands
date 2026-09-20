@@ -1,0 +1,60 @@
+================================================================================
+SIMULATION 1 (all-in-one): m=5, k<=4, total n=100 (80 truthful + 20 manipulators)
+Trials per cell = 2000  |  INTEGER_MEDIAN = True
+Rank -> Score map = [5, 4, 3, 2, 0]  (Plackett-Luce uses [5, 4, 3, 2, 0])
+Rank-model integer noise = (0.1, 0.8, 0.1)  |  Euclidean scale = 'realized-max'
+================================================================================
+
+[*] Sanity check: integer scores, range [0,5], grade coverage (20000 voters per model)...
+    [OK ] Mallows (phi=0.7)                      dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Plackett-Luce                          dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] 2D Euclidean                           dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Impartial Anonymous Culture (IAC)      dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Polya Urn (alpha=0.2)                  dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Impartial Culture (IC)                 dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK] All six models produce integers in {0,...,5} and use every grade.
+
+[*] Sanity check: aggregated median under even n ...
+    [OK] even n = 2, lower-median per column = [1.0, 3.0, 2.0, 1.0, 0.0] (all integers)
+
+================================================================================
+[*] Base Output Directory:   /home/user/sim1_single/output_median_project/Simulation 1
+[*] Graphs Output Directory: /home/user/sim1_single/output_median_project/Simulation 1/graphs
+[*] Tables Output Directory: /home/user/sim1_single/output_median_project/Simulation 1/tables
+================================================================================
+[*] 24 batches across 2 CPU cores...
+
+Simulating Elections: [1/24] (4.2%)Simulating Elections: [2/24] (8.3%)Simulating Elections: [3/24] (12.5%)Simulating Elections: [4/24] (16.7%)Simulating Elections: [5/24] (20.8%)Simulating Elections: [6/24] (25.0%)Simulating Elections: [7/24] (29.2%)Simulating Elections: [8/24] (33.3%)Simulating Elections: [9/24] (37.5%)Simulating Elections: [10/24] (41.7%)Simulating Elections: [11/24] (45.8%)Simulating Elections: [12/24] (50.0%)Simulating Elections: [13/24] (54.2%)Simulating Elections: [14/24] (58.3%)Simulating Elections: [15/24] (62.5%)Simulating Elections: [16/24] (66.7%)Simulating Elections: [17/24] (70.8%)Simulating Elections: [18/24] (75.0%)Simulating Elections: [19/24] (79.2%)Simulating Elections: [20/24] (83.3%)Simulating Elections: [21/24] (87.5%)Simulating Elections: [22/24] (91.7%)Simulating Elections: [23/24] (95.8%)Simulating Elections: [24/24] (100.0%)
+
+[+] Raw results saved (66.84s).
+[*] Exporting summary tables...
+                          Change_Rate  Success_Rate  Avg_Overlap
+Target Rule                                                     
+Bottom Evaluative Voting       72.940        72.940        0.675
+       k-Median Rule           63.090        51.273        0.686
+       k-Median-Shapley        47.279        35.121        0.773
+Cutoff Evaluative Voting       97.777        97.777        0.489
+       k-Median Rule           77.415        77.415        0.594
+       k-Median-Shapley        63.608        62.200        0.671
+
+[*] Rendering main figures for k in {2, 3, 4}  (80 truthful + 20 manipulators, 2,000 trials per cell)
+[*] Output: /home/user/sim1_single/output_median_project/Simulation 1/graphs
+
+    [+] sim1_cutoff_change_rate.png  /  sim1_cutoff_change_rate.pdf
+    [+] sim1_overlap_cutoff.png  /  sim1_overlap_cutoff.pdf
+    [+] sim1_bottom_change_and_success.png  /  sim1_bottom_change_and_success.pdf
+    [+] sim1_aggregate_comparison.png  /  sim1_aggregate_comparison.pdf
+
+[*] Rendering appendix figures for k in {1, 2, 3, 4}
+    [+] sim1_cutoff_success_rate.png  /  sim1_cutoff_success_rate.pdf
+    [+] sim1_bottom_change_rate.png  /  sim1_bottom_change_rate.pdf
+
+[*] Exporting LaTeX tables...
+    [+] sim1_table_cutoff_change_rate.tex
+    [+] sim1_table_bottom_change_rate.tex
+    [+] sim1_table_bottom_success_rate.tex
+
+[*] Done. PNG (300 dpi) and PDF (vector) versions were written.
+================================================================================
+SIMULATION 1 COMPLETED SUCCESSFULLY
+================================================================================

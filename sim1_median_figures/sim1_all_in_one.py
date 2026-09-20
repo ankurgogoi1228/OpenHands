@@ -27,6 +27,18 @@ Score discipline (STRICT):
     This applies both to the honest profile (80 voters) and to the attacked
     profile (100 voters).
 
+GRADE COVERAGE (two models needed a fix)
+  - The rank -> score map (5,4,3,2,0) uses five of the six grades, so a purely rank-based
+    model can never emit grade 1. Both rank-based models (Mallows and Plackett-Luce)
+    therefore add independent integer noise in {-1,0,+1} with probabilities (0.1,0.8,0.1),
+    clipped to [0,5], which makes all six grades reachable. Set RANK_MODEL_NOISE = None to
+    switch the noise off (grade 1 then disappears again).
+  - 2D Euclidean with d_ref = sqrt(2): with five uniform points in the unit square the
+    largest realised voter-candidate distance is about 1.27, so the raw score never drops
+    below ~0.5 and grade 0 is unreachable. EUCLIDEAN_SCALE = "realized-max" divides by the
+    maximum distance realised in the trial, so grade 0 is always attained and the whole
+    scale {0,...,5} is used. EUCLIDEAN_SCALE = "sqrt2" restores the paper's exact formula.
+
 Command line
 ------------
     python sim1_median_committee.py                       # full run, k in {2,3,4}
@@ -84,6 +96,22 @@ RANK_TO_SCORE = np.array([5, 4, 3, 2, 0], dtype=int)
 
 # For even n use the LOWER of the two middle order statistics (always an integer).
 INTEGER_MEDIAN = True
+
+# Rank -> score map used by Plackett-Luce. Kept identical to RANK_TO_SCORE so that both
+# rank-based models share one mapping, as required. Switching it to (5,4,3,2,1) would also
+# reach grade 1, but the worst-ranked candidate would then no longer receive 0.
+PL_RANK_TO_SCORE = RANK_TO_SCORE
+
+# Independent integer noise applied AFTER the rank -> score map: P(-1), P(0), P(+1).
+# Required for the rank-based models to reach every grade; set to None to disable.
+RANK_MODEL_NOISE = (0.1, 0.8, 0.1)
+
+# "realized-max" -> divide by the largest voter-candidate distance realised in the trial,
+#                   so grade 0 is always attained and the full scale is used
+# "sqrt2"        -> the paper's exact formula (grade 0 is then unreachable)
+EUCLIDEAN_SCALE = "realized-max"
+
+REQUIRED_GRADES = set(range(SCALE_MAX + 1))
 
 TARGETS = ['Cutoff', 'Bottom']
 RULES = ['Evaluative Voting', 'k-Median Rule', 'k-Median-Shapley']
@@ -163,10 +191,24 @@ def shapley_median_rule(scores, k):
 # ======================================================================================
 # 3. PREFERENCE GENERATIVE MODELS (STRICT INTEGER SCORES)
 # ======================================================================================
+def _add_integer_noise(profile, probs=None, scale_max=SCALE_MAX):
+    """Add independent integer noise in {-1,0,+1} to every entry, clipped to [0, scale_max].
+
+    This is what makes grade 1 reachable for the rank-based models: the five-slot map
+    (5,4,3,2,0) on its own can only produce {0,2,3,4,5}. Every score stays an integer.
+    """
+    if probs is None:                 # read the module constant at CALL time,
+        probs = RANK_MODEL_NOISE       # so it can be toggled without re-importing
+    if probs is None:
+        return profile.astype(np.int64)
+    noise = np.random.choice([-1, 0, 1], size=profile.shape, p=list(probs))
+    return np.clip(profile + noise, 0, scale_max).astype(np.int64)
+
+
 def generate_mallows(n, m=M, phi=0.7, scale_max=SCALE_MAX):
     """1. Mallows model (phi = 0.7): integer map (5,4,3,2,0) + integer noise in
-    {-1,0,+1} with probabilities (0.1, 0.8, 0.1), clipped to [0,5]."""
-    profile = np.zeros((n, m), dtype=int)
+    {-1,0,+1} with probabilities (0.1, 0.8, 0.1), clipped to [0,5] -> grades {0,...,5}."""
+    profile = np.zeros((n, m), dtype=np.int64)
     for i in range(n):
         ranking = []
         for j in range(m):
@@ -175,17 +217,16 @@ def generate_mallows(n, m=M, phi=0.7, scale_max=SCALE_MAX):
             pos = np.random.choice(j + 1, p=probs)
             ranking.insert(pos, j)
         for rank_pos, cand in enumerate(ranking):
-            base = int(RANK_TO_SCORE[rank_pos])
-            noise = int(np.random.choice([-1, 0, 1], p=[0.1, 0.8, 0.1]))
-            profile[i, cand] = int(np.clip(base + noise, 0, scale_max))
-    return profile
+            profile[i, cand] = int(RANK_TO_SCORE[rank_pos])
+    return _add_integer_noise(profile, scale_max=scale_max)
 
 
 def generate_plackett_luce(n, m=M, scale_max=SCALE_MAX):
-    """2. Plackett-Luce: probabilistic ranking from latent qualities gamma,
-    integer map (5,4,3,2,0), no additive noise."""
+    """2. Plackett-Luce: probabilistic ranking from latent qualities gamma, integer map
+    PL_RANK_TO_SCORE = (5,4,3,2,0), then the same integer noise as Mallows so that every
+    grade {0,...,5} is reachable (without noise grade 1 could never occur)."""
     gamma = np.random.gamma(shape=2.5, scale=1.0, size=m)
-    profile = np.zeros((n, m), dtype=int)
+    profile = np.zeros((n, m), dtype=np.int64)
     for i in range(n):
         remaining = list(range(m))
         ranking = []
@@ -196,39 +237,41 @@ def generate_plackett_luce(n, m=M, scale_max=SCALE_MAX):
             ranking.append(chosen)
             remaining.remove(chosen)
         for rank_pos, cand in enumerate(ranking):
-            profile[i, cand] = int(RANK_TO_SCORE[rank_pos])
-    return profile
+            profile[i, cand] = int(PL_RANK_TO_SCORE[rank_pos])
+    return _add_integer_noise(profile, scale_max=scale_max)
 
 
 def generate_euclidean(n, m=M, dim=2, scale_max=SCALE_MAX):
-    """3. 2D Euclidean: score = clip(floor(5*(1 - d/sqrt(dim)) + 0.5), 0, 5)."""
+    """3. 2D Euclidean: score = clip(floor(5*(1 - d/d_ref) + 0.5), 0, 5).
+
+    d_ref = sqrt(dim)  -> the paper's exact formula, which with m = 5 uniform points
+                          leaves grade 0 unreachable (realised distances stay below sqrt2)
+    d_ref = realised  -> the largest voter-candidate distance in this trial, so the extreme
+                          pair receives 0 and every grade in {0,...,5} becomes reachable
+    """
     candidates = np.random.uniform(0, 1, size=(m, dim))
     voters = np.random.uniform(0, 1, size=(n, dim))
-    profile = np.zeros((n, m), dtype=int)
-    d_max = np.sqrt(dim)
-    for i in range(n):
-        dists = np.linalg.norm(candidates - voters[i], axis=1)
-        raw = scale_max * (1.0 - dists / d_max)
-        scores = np.floor(raw + 0.5).astype(int)
-        profile[i, :] = np.clip(scores, 0, scale_max)
-    return profile
+    d = np.linalg.norm(voters[:, None, :] - candidates[None, :, :], axis=2)
+    d_ref = np.sqrt(dim) if EUCLIDEAN_SCALE == "sqrt2" else d.max()
+    raw = scale_max * (1.0 - d / d_ref)
+    return np.clip(np.floor(raw + 0.5), 0, scale_max).astype(np.int64)
 
 
 def generate_iac(n, m=M, scale_max=SCALE_MAX):
     """4. IAC (score-based): per candidate, a Dirichlet distribution over the six
     discrete scores, sampled independently for each voter."""
-    profile = np.zeros((n, m), dtype=int)
+    profile = np.zeros((n, m), dtype=np.int64)
     for j in range(m):
         probs = np.random.dirichlet(np.ones(scale_max + 1))
-        profile[:, j] = np.random.choice(scale_max + 1, size=n, p=probs)
+        profile[:, j] = np.random.choice(scale_max + 1, size=n, p=probs).astype(np.int64)
     return profile
 
 
 def generate_urn(n, m=M, alpha=0.2, scale_max=SCALE_MAX):
     """5. Polya-Eggenberger urn (alpha = 0.2): 8 integer ballots in the urn,
     uniform draw per voter, copied back with probability alpha."""
-    urn = [np.random.randint(0, scale_max + 1, size=m) for _ in range(8)]
-    profile = np.zeros((n, m), dtype=int)
+    urn = [np.random.randint(0, scale_max + 1, size=m, dtype=np.int64) for _ in range(8)]
+    profile = np.zeros((n, m), dtype=np.int64)
     for i in range(n):
         idx = np.random.randint(len(urn))
         ballot = urn[idx]
@@ -240,7 +283,7 @@ def generate_urn(n, m=M, alpha=0.2, scale_max=SCALE_MAX):
 
 def generate_ic(n, m=M, scale_max=SCALE_MAX):
     """6. IC (score-based interpretation): every score drawn uniformly from {0,...,5}."""
-    return np.random.randint(0, scale_max + 1, size=(n, m))
+    return np.random.randint(0, scale_max + 1, size=(n, m), dtype=np.int64)
 
 
 BEST_MODELS = {
@@ -314,24 +357,36 @@ def execute_task(args):
 # ======================================================================================
 # 5. SANITY CHECKS
 # ======================================================================================
-def sanity_check_profiles():
-    print("\n[*] Sanity check: integer scores only, admissible range, grade coverage...")
+def sanity_check_profiles(sample=20000):
+    """Integer dtype, admissible range, and FULL grade coverage {0,...,5} for every model."""
+    print(f"\n[*] Sanity check: integer scores, range [0,{SCALE_MAX}], grade coverage "
+          f"({sample} voters per model)...")
     all_ok = True
     for name, fn in BEST_MODELS.items():
-        profile = fn(1000, M)
+        profile = fn(sample, M)
         if profile.dtype.kind not in 'iu':
             print(f"    [FAIL] {name}: non-integer dtype = {profile.dtype}")
             all_ok = False
             continue
-        if profile.min() < 0 or profile.max() > SCALE_MAX:
-            print(f"    [FAIL] {name}: scores outside [0,{SCALE_MAX}]")
-            all_ok = False
-            continue
         grades = sorted(np.unique(profile).tolist())
-        print(f"    {name:38s} dtype={profile.dtype}  "
+        missing = sorted(REQUIRED_GRADES - set(grades))
+        out_of_range = profile.min() < 0 or profile.max() > SCALE_MAX
+        ok = not missing and not out_of_range
+        all_ok &= ok
+        print(f"    [{'OK ' if ok else 'FAIL'}] {name:38s} dtype={profile.dtype}  "
               f"min={profile.min()}  max={profile.max()}  grades={grades}")
+        if out_of_range:
+            print(f"           scores outside [0,{SCALE_MAX}]")
+        elif missing:
+            hint = ""
+            if name == '2D Euclidean' and EUCLIDEAN_SCALE == "sqrt2":
+                hint = "   (set EUCLIDEAN_SCALE = 'realized-max' to reach grade 0)"
+            if name in ('Mallows (phi=0.7)', 'Plackett-Luce') and RANK_MODEL_NOISE is None:
+                hint = "   (grade 1 needs RANK_MODEL_NOISE, or the map (5,4,3,2,1))"
+            print(f"           unreachable grades: {missing}{hint}")
     if all_ok:
-        print("    [OK] All models produce integer scores in {0,...,5}.")
+        print("    [OK] All six models produce integers in "
+              "{0,...,5} and use every grade.")
     print()
     return all_ok
 
@@ -753,7 +808,10 @@ def main():
     print(f"SIMULATION 1 (all-in-one): m={M}, k<=4, total n={TOTAL_N} "
           f"({N_HONEST} truthful + {N_MANIP} manipulators)")
     print(f"Trials per cell = {NUM_ITERATIONS}  |  INTEGER_MEDIAN = {INTEGER_MEDIAN}")
-    print(f"Rank -> Score map = {RANK_TO_SCORE.tolist()}")
+    print(f"Rank -> Score map = {RANK_TO_SCORE.tolist()}  (Plackett-Luce uses "
+          f"{PL_RANK_TO_SCORE.tolist()})")
+    print(f"Rank-model integer noise = {RANK_MODEL_NOISE}  |  "
+          f"Euclidean scale = '{EUCLIDEAN_SCALE}'")
     print("=" * 80)
 
     sanity_check_profiles()

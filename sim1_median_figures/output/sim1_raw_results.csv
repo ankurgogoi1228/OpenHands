@@ -1,76 +1,76 @@
 Culture,k,n_total,n_honest,n_manip,trials,Target,Rule,Change_Rate,Avg_Overlap,Success_Rate
 Mallows (phi=0.7),1,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.0,100.0
-Mallows (phi=0.7),1,100,80,20,2000,Cutoff,k-Median Rule,67.0,0.33,67.0
-Mallows (phi=0.7),1,100,80,20,2000,Cutoff,k-Median-Shapley,51.1,0.489,51.1
-Mallows (phi=0.7),1,100,80,20,2000,Bottom,Evaluative Voting,9.15,0.9085,9.15
-Mallows (phi=0.7),1,100,80,20,2000,Bottom,k-Median Rule,2.45,0.9755,0.05
-Mallows (phi=0.7),1,100,80,20,2000,Bottom,k-Median-Shapley,8.6,0.914,0.0
+Mallows (phi=0.7),1,100,80,20,2000,Cutoff,k-Median Rule,67.55,0.3245,67.55
+Mallows (phi=0.7),1,100,80,20,2000,Cutoff,k-Median-Shapley,52.65,0.4735,52.65
+Mallows (phi=0.7),1,100,80,20,2000,Bottom,Evaluative Voting,8.9,0.911,8.9
+Mallows (phi=0.7),1,100,80,20,2000,Bottom,k-Median Rule,2.8000000000000003,0.972,0.0
+Mallows (phi=0.7),1,100,80,20,2000,Bottom,k-Median-Shapley,9.55,0.9045,0.0
 Mallows (phi=0.7),2,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.5,100.0
-Mallows (phi=0.7),2,100,80,20,2000,Cutoff,k-Median Rule,56.35,0.71825,56.35
-Mallows (phi=0.7),2,100,80,20,2000,Cutoff,k-Median-Shapley,43.1,0.7845,42.95
-Mallows (phi=0.7),2,100,80,20,2000,Bottom,Evaluative Voting,52.349999999999994,0.73825,52.349999999999994
-Mallows (phi=0.7),2,100,80,20,2000,Bottom,k-Median Rule,6.8500000000000005,0.96575,2.6
-Mallows (phi=0.7),2,100,80,20,2000,Bottom,k-Median-Shapley,9.45,0.95275,0.1
-Mallows (phi=0.7),3,100,80,20,2000,Cutoff,Evaluative Voting,99.95,0.6668333333333393,99.95
-Mallows (phi=0.7),3,100,80,20,2000,Cutoff,k-Median Rule,67.30000000000001,0.7756666666666772,67.30000000000001
-Mallows (phi=0.7),3,100,80,20,2000,Cutoff,k-Median-Shapley,45.4,0.8486666666666753,45.4
-Mallows (phi=0.7),3,100,80,20,2000,Bottom,Evaluative Voting,92.5,0.6916666666666749,92.5
-Mallows (phi=0.7),3,100,80,20,2000,Bottom,k-Median Rule,44.2,0.8523333333333427,43.0
-Mallows (phi=0.7),3,100,80,20,2000,Bottom,k-Median-Shapley,22.3,0.9256666666666722,15.8
-Mallows (phi=0.7),4,100,80,20,2000,Cutoff,Evaluative Voting,99.85000000000001,0.750375,99.85000000000001
-Mallows (phi=0.7),4,100,80,20,2000,Cutoff,k-Median Rule,59.150000000000006,0.852125,59.150000000000006
+Mallows (phi=0.7),2,100,80,20,2000,Cutoff,k-Median Rule,56.65,0.71675,56.65
+Mallows (phi=0.7),2,100,80,20,2000,Cutoff,k-Median-Shapley,44.9,0.7755,44.85
+Mallows (phi=0.7),2,100,80,20,2000,Bottom,Evaluative Voting,55.25,0.72375,55.25
+Mallows (phi=0.7),2,100,80,20,2000,Bottom,k-Median Rule,6.75,0.96625,2.35
+Mallows (phi=0.7),2,100,80,20,2000,Bottom,k-Median-Shapley,8.4,0.958,0.15
+Mallows (phi=0.7),3,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.6666666666666725,100.0
+Mallows (phi=0.7),3,100,80,20,2000,Cutoff,k-Median Rule,67.10000000000001,0.7763333333333431,67.10000000000001
+Mallows (phi=0.7),3,100,80,20,2000,Cutoff,k-Median-Shapley,45.050000000000004,0.8498333333333423,45.050000000000004
+Mallows (phi=0.7),3,100,80,20,2000,Bottom,Evaluative Voting,93.15,0.6895000000000078,93.15
+Mallows (phi=0.7),3,100,80,20,2000,Bottom,k-Median Rule,44.2,0.8523333333333424,43.05
+Mallows (phi=0.7),3,100,80,20,2000,Bottom,k-Median-Shapley,21.0,0.9300000000000047,14.7
+Mallows (phi=0.7),4,100,80,20,2000,Cutoff,Evaluative Voting,99.75,0.750625,99.75
+Mallows (phi=0.7),4,100,80,20,2000,Cutoff,k-Median Rule,58.5,0.85375,58.5
 Mallows (phi=0.7),4,100,80,20,2000,Cutoff,k-Median-Shapley,50.849999999999994,0.872875,50.849999999999994
-Mallows (phi=0.7),4,100,80,20,2000,Bottom,Evaluative Voting,99.85000000000001,0.750375,99.85000000000001
-Mallows (phi=0.7),4,100,80,20,2000,Bottom,k-Median Rule,59.150000000000006,0.852125,59.150000000000006
+Mallows (phi=0.7),4,100,80,20,2000,Bottom,Evaluative Voting,99.75,0.750625,99.75
+Mallows (phi=0.7),4,100,80,20,2000,Bottom,k-Median Rule,58.5,0.85375,58.5
 Mallows (phi=0.7),4,100,80,20,2000,Bottom,k-Median-Shapley,50.849999999999994,0.872875,50.849999999999994
-Plackett-Luce,1,100,80,20,2000,Cutoff,Evaluative Voting,96.7,0.033,96.7
-Plackett-Luce,1,100,80,20,2000,Cutoff,k-Median Rule,68.30000000000001,0.317,68.30000000000001
-Plackett-Luce,1,100,80,20,2000,Cutoff,k-Median-Shapley,42.8,0.572,42.6
-Plackett-Luce,1,100,80,20,2000,Bottom,Evaluative Voting,9.049999999999999,0.9095,9.049999999999999
-Plackett-Luce,1,100,80,20,2000,Bottom,k-Median Rule,32.35,0.6765,5.949999999999999
-Plackett-Luce,1,100,80,20,2000,Bottom,k-Median-Shapley,15.8,0.842,0.2
-Plackett-Luce,2,100,80,20,2000,Cutoff,Evaluative Voting,97.75,0.51125,97.75
-Plackett-Luce,2,100,80,20,2000,Cutoff,k-Median Rule,79.45,0.5935,79.45
-Plackett-Luce,2,100,80,20,2000,Cutoff,k-Median-Shapley,56.25,0.7185,55.800000000000004
-Plackett-Luce,2,100,80,20,2000,Bottom,Evaluative Voting,27.05,0.86475,27.05
-Plackett-Luce,2,100,80,20,2000,Bottom,k-Median Rule,47.199999999999996,0.75325,18.4
-Plackett-Luce,2,100,80,20,2000,Bottom,k-Median-Shapley,18.95,0.90475,1.5
-Plackett-Luce,3,100,80,20,2000,Cutoff,Evaluative Voting,93.75,0.6875000000000067,93.75
-Plackett-Luce,3,100,80,20,2000,Cutoff,k-Median Rule,76.85,0.7376666666666762,76.85
-Plackett-Luce,3,100,80,20,2000,Cutoff,k-Median-Shapley,46.800000000000004,0.8436666666666763,46.75
-Plackett-Luce,3,100,80,20,2000,Bottom,Evaluative Voting,51.800000000000004,0.8273333333333428,51.800000000000004
-Plackett-Luce,3,100,80,20,2000,Bottom,k-Median Rule,56.65,0.7956666666666742,40.949999999999996
-Plackett-Luce,3,100,80,20,2000,Bottom,k-Median-Shapley,23.1,0.9225000000000056,13.200000000000001
-Plackett-Luce,4,100,80,20,2000,Cutoff,Evaluative Voting,78.7,0.80325,78.7
-Plackett-Luce,4,100,80,20,2000,Cutoff,k-Median Rule,62.0,0.845,62.0
-Plackett-Luce,4,100,80,20,2000,Cutoff,k-Median-Shapley,33.25,0.916875,33.25
-Plackett-Luce,4,100,80,20,2000,Bottom,Evaluative Voting,78.7,0.80325,78.7
-Plackett-Luce,4,100,80,20,2000,Bottom,k-Median Rule,62.0,0.845,62.0
-Plackett-Luce,4,100,80,20,2000,Bottom,k-Median-Shapley,33.25,0.916875,33.25
+Plackett-Luce,1,100,80,20,2000,Cutoff,Evaluative Voting,97.65,0.0235,97.65
+Plackett-Luce,1,100,80,20,2000,Cutoff,k-Median Rule,70.15,0.2985,70.15
+Plackett-Luce,1,100,80,20,2000,Cutoff,k-Median-Shapley,47.349999999999994,0.5265,47.25
+Plackett-Luce,1,100,80,20,2000,Bottom,Evaluative Voting,9.75,0.9025,9.75
+Plackett-Luce,1,100,80,20,2000,Bottom,k-Median Rule,32.300000000000004,0.677,6.15
+Plackett-Luce,1,100,80,20,2000,Bottom,k-Median-Shapley,15.0,0.85,0.2
+Plackett-Luce,2,100,80,20,2000,Cutoff,Evaluative Voting,97.55,0.51225,97.55
+Plackett-Luce,2,100,80,20,2000,Cutoff,k-Median Rule,80.5,0.58375,80.5
+Plackett-Luce,2,100,80,20,2000,Cutoff,k-Median-Shapley,55.7,0.721,55.45
+Plackett-Luce,2,100,80,20,2000,Bottom,Evaluative Voting,28.299999999999997,0.8585,28.299999999999997
+Plackett-Luce,2,100,80,20,2000,Bottom,k-Median Rule,47.599999999999994,0.74525,20.200000000000003
+Plackett-Luce,2,100,80,20,2000,Bottom,k-Median-Shapley,17.7,0.91125,1.7999999999999998
+Plackett-Luce,3,100,80,20,2000,Cutoff,Evaluative Voting,93.95,0.6868333333333408,93.95
+Plackett-Luce,3,100,80,20,2000,Cutoff,k-Median Rule,78.2,0.7341666666666751,78.2
+Plackett-Luce,3,100,80,20,2000,Cutoff,k-Median-Shapley,46.150000000000006,0.8461666666666765,46.1
+Plackett-Luce,3,100,80,20,2000,Bottom,Evaluative Voting,49.95,0.8335000000000098,49.95
+Plackett-Luce,3,100,80,20,2000,Bottom,k-Median Rule,53.2,0.8090000000000079,37.85
+Plackett-Luce,3,100,80,20,2000,Bottom,k-Median-Shapley,21.8,0.9268333333333385,12.35
+Plackett-Luce,4,100,80,20,2000,Cutoff,Evaluative Voting,80.80000000000001,0.798,80.80000000000001
+Plackett-Luce,4,100,80,20,2000,Cutoff,k-Median Rule,63.55,0.841125,63.55
+Plackett-Luce,4,100,80,20,2000,Cutoff,k-Median-Shapley,36.3,0.90925,36.3
+Plackett-Luce,4,100,80,20,2000,Bottom,Evaluative Voting,80.80000000000001,0.798,80.80000000000001
+Plackett-Luce,4,100,80,20,2000,Bottom,k-Median Rule,63.55,0.841125,63.55
+Plackett-Luce,4,100,80,20,2000,Bottom,k-Median-Shapley,36.3,0.90925,36.3
 2D Euclidean,1,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.0,100.0
-2D Euclidean,1,100,80,20,2000,Cutoff,k-Median Rule,71.5,0.285,71.5
-2D Euclidean,1,100,80,20,2000,Cutoff,k-Median-Shapley,63.4,0.366,53.449999999999996
-2D Euclidean,1,100,80,20,2000,Bottom,Evaluative Voting,98.6,0.014,98.6
-2D Euclidean,1,100,80,20,2000,Bottom,k-Median Rule,61.75000000000001,0.3825,32.550000000000004
-2D Euclidean,1,100,80,20,2000,Bottom,k-Median-Shapley,41.5,0.585,4.3999999999999995
+2D Euclidean,1,100,80,20,2000,Cutoff,k-Median Rule,55.15,0.4485,55.15
+2D Euclidean,1,100,80,20,2000,Cutoff,k-Median-Shapley,47.949999999999996,0.5205,40.0
+2D Euclidean,1,100,80,20,2000,Bottom,Evaluative Voting,92.65,0.0735,92.65
+2D Euclidean,1,100,80,20,2000,Bottom,k-Median Rule,48.1,0.519,25.0
+2D Euclidean,1,100,80,20,2000,Bottom,k-Median-Shapley,35.949999999999996,0.6405,4.2
 2D Euclidean,2,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.5,100.0
-2D Euclidean,2,100,80,20,2000,Cutoff,k-Median Rule,74.8,0.58075,74.8
-2D Euclidean,2,100,80,20,2000,Cutoff,k-Median-Shapley,62.9,0.66525,51.74999999999999
-2D Euclidean,2,100,80,20,2000,Bottom,Evaluative Voting,99.55000000000001,0.50225,99.55000000000001
-2D Euclidean,2,100,80,20,2000,Bottom,k-Median Rule,71.0,0.59225,42.75
-2D Euclidean,2,100,80,20,2000,Bottom,k-Median-Shapley,49.1,0.7405,9.45
+2D Euclidean,2,100,80,20,2000,Cutoff,k-Median Rule,77.7,0.5715,77.7
+2D Euclidean,2,100,80,20,2000,Cutoff,k-Median-Shapley,62.35000000000001,0.67275,57.550000000000004
+2D Euclidean,2,100,80,20,2000,Bottom,Evaluative Voting,98.05,0.50975,98.05
+2D Euclidean,2,100,80,20,2000,Bottom,k-Median Rule,73.85000000000001,0.5745,53.75
+2D Euclidean,2,100,80,20,2000,Bottom,k-Median-Shapley,47.75,0.7455,18.0
 2D Euclidean,3,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.6666666666666725,100.0
-2D Euclidean,3,100,80,20,2000,Cutoff,k-Median Rule,75.75,0.7221666666666726,75.75
-2D Euclidean,3,100,80,20,2000,Cutoff,k-Median-Shapley,53.300000000000004,0.8113333333333418,46.75
-2D Euclidean,3,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.6666666666666725,100.0
-2D Euclidean,3,100,80,20,2000,Bottom,k-Median Rule,76.1,0.710500000000004,56.05
-2D Euclidean,3,100,80,20,2000,Bottom,k-Median-Shapley,48.65,0.825833333333341,22.1
-2D Euclidean,4,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.75,100.0
-2D Euclidean,4,100,80,20,2000,Cutoff,k-Median Rule,80.9,0.79775,80.9
-2D Euclidean,4,100,80,20,2000,Cutoff,k-Median-Shapley,50.64999999999999,0.873375,50.64999999999999
-2D Euclidean,4,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.75,100.0
-2D Euclidean,4,100,80,20,2000,Bottom,k-Median Rule,80.9,0.79775,80.9
-2D Euclidean,4,100,80,20,2000,Bottom,k-Median-Shapley,50.64999999999999,0.873375,50.64999999999999
+2D Euclidean,3,100,80,20,2000,Cutoff,k-Median Rule,88.4,0.6746666666666715,88.4
+2D Euclidean,3,100,80,20,2000,Cutoff,k-Median-Shapley,71.5,0.750666666666676,69.19999999999999
+2D Euclidean,3,100,80,20,2000,Bottom,Evaluative Voting,99.75,0.6675000000000059,99.75
+2D Euclidean,3,100,80,20,2000,Bottom,k-Median Rule,85.75,0.6601666666666686,73.6
+2D Euclidean,3,100,80,20,2000,Bottom,k-Median-Shapley,58.199999999999996,0.7871666666666741,42.449999999999996
+2D Euclidean,4,100,80,20,2000,Cutoff,Evaluative Voting,99.95,0.750125,99.95
+2D Euclidean,4,100,80,20,2000,Cutoff,k-Median Rule,86.8,0.783,86.8
+2D Euclidean,4,100,80,20,2000,Cutoff,k-Median-Shapley,68.0,0.83,68.0
+2D Euclidean,4,100,80,20,2000,Bottom,Evaluative Voting,99.95,0.750125,99.95
+2D Euclidean,4,100,80,20,2000,Bottom,k-Median Rule,86.8,0.783,86.8
+2D Euclidean,4,100,80,20,2000,Bottom,k-Median-Shapley,68.0,0.83,68.0
 Impartial Anonymous Culture (IAC),1,100,80,20,2000,Cutoff,Evaluative Voting,96.5,0.035,96.5
 Impartial Anonymous Culture (IAC),1,100,80,20,2000,Cutoff,k-Median Rule,67.5,0.325,67.5
 Impartial Anonymous Culture (IAC),1,100,80,20,2000,Cutoff,k-Median-Shapley,51.24999999999999,0.4875,50.849999999999994
