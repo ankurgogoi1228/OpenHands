@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Committee change rate (\%) under the cutoff attack (80 truthful + 20 manipulators, 2,000 trials per cell).}
+  \label{tab:sim1-cutoff-change}
+  \begin{tabular}{@{}llS[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]@{}}
+    \toprule
+    & & \multicolumn{4}{c}{Committee size $k$} \\
+    \cmidrule(lr){3-6}
+    Culture & Rule & {$k=1$} & {$k=2$} & {$k=3$} & {$k=4$} \\
+    \midrule
+    \multirow{3}{*}{Mallows ($\varphi=0.7$)} & Evaluative & 100.00 & 100.00 & 99.95 & 99.85 \\
+    & $k$-Median & 67.00 & 56.35 & 67.30 & 59.15 \\
+    & $k$-Median-Shapley & 51.10 & 43.10 & 45.40 & 50.85 \\
+    \midrule
+    \multirow{3}{*}{Plackett--Luce} & Evaluative & 96.70 & 97.75 & 93.75 & 78.70 \\
+    & $k$-Median & 68.30 & 79.45 & 76.85 & 62.00 \\
+    & $k$-Median-Shapley & 42.80 & 56.25 & 46.80 & 33.25 \\
+    \midrule
+    \multirow{3}{*}{2D Euclidean} & Evaluative & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 71.50 & 74.80 & 75.75 & 80.90 \\
+    & $k$-Median-Shapley & 63.40 & 62.90 & 53.30 & 50.65 \\
+    \midrule
+    \multirow{3}{*}{IAC} & Evaluative & 96.50 & 99.10 & 98.75 & 96.70 \\
+    & $k$-Median & 67.50 & 80.85 & 83.05 & 78.20 \\
+    & $k$-Median-Shapley & 51.25 & 68.95 & 72.70 & 64.60 \\
+    \midrule
+    \multirow{3}{*}{P\'olya Urn ($\alpha=0.2$)} & Evaluative & 95.70 & 97.90 & 97.65 & 94.70 \\
+    & $k$-Median & 66.45 & 79.00 & 78.70 & 77.00 \\
+    & $k$-Median-Shapley & 52.75 & 64.70 & 68.20 & 64.65 \\
+    \midrule
+    \multirow{3}{*}{Impartial Culture} & Evaluative & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 98.35 & 99.75 & 99.55 & 99.30 \\
+    & $k$-Median-Shapley & 94.15 & 98.45 & 99.05 & 98.40 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

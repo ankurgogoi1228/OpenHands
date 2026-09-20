@@ -1,0 +1,145 @@
+Culture,k,n_total,n_honest,n_manip,trials,Target,Rule,Change_Rate,Avg_Overlap,Success_Rate
+Mallows (phi=0.7),1,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.0,100.0
+Mallows (phi=0.7),1,100,80,20,2000,Cutoff,k-Median Rule,67.0,0.33,67.0
+Mallows (phi=0.7),1,100,80,20,2000,Cutoff,k-Median-Shapley,51.1,0.489,51.1
+Mallows (phi=0.7),1,100,80,20,2000,Bottom,Evaluative Voting,9.15,0.9085,9.15
+Mallows (phi=0.7),1,100,80,20,2000,Bottom,k-Median Rule,2.45,0.9755,0.05
+Mallows (phi=0.7),1,100,80,20,2000,Bottom,k-Median-Shapley,8.6,0.914,0.0
+Mallows (phi=0.7),2,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.5,100.0
+Mallows (phi=0.7),2,100,80,20,2000,Cutoff,k-Median Rule,56.35,0.71825,56.35
+Mallows (phi=0.7),2,100,80,20,2000,Cutoff,k-Median-Shapley,43.1,0.7845,42.95
+Mallows (phi=0.7),2,100,80,20,2000,Bottom,Evaluative Voting,52.349999999999994,0.73825,52.349999999999994
+Mallows (phi=0.7),2,100,80,20,2000,Bottom,k-Median Rule,6.8500000000000005,0.96575,2.6
+Mallows (phi=0.7),2,100,80,20,2000,Bottom,k-Median-Shapley,9.45,0.95275,0.1
+Mallows (phi=0.7),3,100,80,20,2000,Cutoff,Evaluative Voting,99.95,0.6668333333333393,99.95
+Mallows (phi=0.7),3,100,80,20,2000,Cutoff,k-Median Rule,67.30000000000001,0.7756666666666772,67.30000000000001
+Mallows (phi=0.7),3,100,80,20,2000,Cutoff,k-Median-Shapley,45.4,0.8486666666666753,45.4
+Mallows (phi=0.7),3,100,80,20,2000,Bottom,Evaluative Voting,92.5,0.6916666666666749,92.5
+Mallows (phi=0.7),3,100,80,20,2000,Bottom,k-Median Rule,44.2,0.8523333333333427,43.0
+Mallows (phi=0.7),3,100,80,20,2000,Bottom,k-Median-Shapley,22.3,0.9256666666666722,15.8
+Mallows (phi=0.7),4,100,80,20,2000,Cutoff,Evaluative Voting,99.85000000000001,0.750375,99.85000000000001
+Mallows (phi=0.7),4,100,80,20,2000,Cutoff,k-Median Rule,59.150000000000006,0.852125,59.150000000000006
+Mallows (phi=0.7),4,100,80,20,2000,Cutoff,k-Median-Shapley,50.849999999999994,0.872875,50.849999999999994
+Mallows (phi=0.7),4,100,80,20,2000,Bottom,Evaluative Voting,99.85000000000001,0.750375,99.85000000000001
+Mallows (phi=0.7),4,100,80,20,2000,Bottom,k-Median Rule,59.150000000000006,0.852125,59.150000000000006
+Mallows (phi=0.7),4,100,80,20,2000,Bottom,k-Median-Shapley,50.849999999999994,0.872875,50.849999999999994
+Plackett-Luce,1,100,80,20,2000,Cutoff,Evaluative Voting,96.7,0.033,96.7
+Plackett-Luce,1,100,80,20,2000,Cutoff,k-Median Rule,68.30000000000001,0.317,68.30000000000001
+Plackett-Luce,1,100,80,20,2000,Cutoff,k-Median-Shapley,42.8,0.572,42.6
+Plackett-Luce,1,100,80,20,2000,Bottom,Evaluative Voting,9.049999999999999,0.9095,9.049999999999999
+Plackett-Luce,1,100,80,20,2000,Bottom,k-Median Rule,32.35,0.6765,5.949999999999999
+Plackett-Luce,1,100,80,20,2000,Bottom,k-Median-Shapley,15.8,0.842,0.2
+Plackett-Luce,2,100,80,20,2000,Cutoff,Evaluative Voting,97.75,0.51125,97.75
+Plackett-Luce,2,100,80,20,2000,Cutoff,k-Median Rule,79.45,0.5935,79.45
+Plackett-Luce,2,100,80,20,2000,Cutoff,k-Median-Shapley,56.25,0.7185,55.800000000000004
+Plackett-Luce,2,100,80,20,2000,Bottom,Evaluative Voting,27.05,0.86475,27.05
+Plackett-Luce,2,100,80,20,2000,Bottom,k-Median Rule,47.199999999999996,0.75325,18.4
+Plackett-Luce,2,100,80,20,2000,Bottom,k-Median-Shapley,18.95,0.90475,1.5
+Plackett-Luce,3,100,80,20,2000,Cutoff,Evaluative Voting,93.75,0.6875000000000067,93.75
+Plackett-Luce,3,100,80,20,2000,Cutoff,k-Median Rule,76.85,0.7376666666666762,76.85
+Plackett-Luce,3,100,80,20,2000,Cutoff,k-Median-Shapley,46.800000000000004,0.8436666666666763,46.75
+Plackett-Luce,3,100,80,20,2000,Bottom,Evaluative Voting,51.800000000000004,0.8273333333333428,51.800000000000004
+Plackett-Luce,3,100,80,20,2000,Bottom,k-Median Rule,56.65,0.7956666666666742,40.949999999999996
+Plackett-Luce,3,100,80,20,2000,Bottom,k-Median-Shapley,23.1,0.9225000000000056,13.200000000000001
+Plackett-Luce,4,100,80,20,2000,Cutoff,Evaluative Voting,78.7,0.80325,78.7
+Plackett-Luce,4,100,80,20,2000,Cutoff,k-Median Rule,62.0,0.845,62.0
+Plackett-Luce,4,100,80,20,2000,Cutoff,k-Median-Shapley,33.25,0.916875,33.25
+Plackett-Luce,4,100,80,20,2000,Bottom,Evaluative Voting,78.7,0.80325,78.7
+Plackett-Luce,4,100,80,20,2000,Bottom,k-Median Rule,62.0,0.845,62.0
+Plackett-Luce,4,100,80,20,2000,Bottom,k-Median-Shapley,33.25,0.916875,33.25
+2D Euclidean,1,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.0,100.0
+2D Euclidean,1,100,80,20,2000,Cutoff,k-Median Rule,71.5,0.285,71.5
+2D Euclidean,1,100,80,20,2000,Cutoff,k-Median-Shapley,63.4,0.366,53.449999999999996
+2D Euclidean,1,100,80,20,2000,Bottom,Evaluative Voting,98.6,0.014,98.6
+2D Euclidean,1,100,80,20,2000,Bottom,k-Median Rule,61.75000000000001,0.3825,32.550000000000004
+2D Euclidean,1,100,80,20,2000,Bottom,k-Median-Shapley,41.5,0.585,4.3999999999999995
+2D Euclidean,2,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.5,100.0
+2D Euclidean,2,100,80,20,2000,Cutoff,k-Median Rule,74.8,0.58075,74.8
+2D Euclidean,2,100,80,20,2000,Cutoff,k-Median-Shapley,62.9,0.66525,51.74999999999999
+2D Euclidean,2,100,80,20,2000,Bottom,Evaluative Voting,99.55000000000001,0.50225,99.55000000000001
+2D Euclidean,2,100,80,20,2000,Bottom,k-Median Rule,71.0,0.59225,42.75
+2D Euclidean,2,100,80,20,2000,Bottom,k-Median-Shapley,49.1,0.7405,9.45
+2D Euclidean,3,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.6666666666666725,100.0
+2D Euclidean,3,100,80,20,2000,Cutoff,k-Median Rule,75.75,0.7221666666666726,75.75
+2D Euclidean,3,100,80,20,2000,Cutoff,k-Median-Shapley,53.300000000000004,0.8113333333333418,46.75
+2D Euclidean,3,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.6666666666666725,100.0
+2D Euclidean,3,100,80,20,2000,Bottom,k-Median Rule,76.1,0.710500000000004,56.05
+2D Euclidean,3,100,80,20,2000,Bottom,k-Median-Shapley,48.65,0.825833333333341,22.1
+2D Euclidean,4,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.75,100.0
+2D Euclidean,4,100,80,20,2000,Cutoff,k-Median Rule,80.9,0.79775,80.9
+2D Euclidean,4,100,80,20,2000,Cutoff,k-Median-Shapley,50.64999999999999,0.873375,50.64999999999999
+2D Euclidean,4,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.75,100.0
+2D Euclidean,4,100,80,20,2000,Bottom,k-Median Rule,80.9,0.79775,80.9
+2D Euclidean,4,100,80,20,2000,Bottom,k-Median-Shapley,50.64999999999999,0.873375,50.64999999999999
+Impartial Anonymous Culture (IAC),1,100,80,20,2000,Cutoff,Evaluative Voting,96.5,0.035,96.5
+Impartial Anonymous Culture (IAC),1,100,80,20,2000,Cutoff,k-Median Rule,67.5,0.325,67.5
+Impartial Anonymous Culture (IAC),1,100,80,20,2000,Cutoff,k-Median-Shapley,51.24999999999999,0.4875,50.849999999999994
+Impartial Anonymous Culture (IAC),1,100,80,20,2000,Bottom,Evaluative Voting,29.7,0.703,29.7
+Impartial Anonymous Culture (IAC),1,100,80,20,2000,Bottom,k-Median Rule,42.9,0.571,15.2
+Impartial Anonymous Culture (IAC),1,100,80,20,2000,Bottom,k-Median-Shapley,22.25,0.7775,2.75
+Impartial Anonymous Culture (IAC),2,100,80,20,2000,Cutoff,Evaluative Voting,99.1,0.5045,99.1
+Impartial Anonymous Culture (IAC),2,100,80,20,2000,Cutoff,k-Median Rule,80.85,0.5715,80.85
+Impartial Anonymous Culture (IAC),2,100,80,20,2000,Cutoff,k-Median-Shapley,68.95,0.6505,68.10000000000001
+Impartial Anonymous Culture (IAC),2,100,80,20,2000,Bottom,Evaluative Voting,64.05,0.67975,64.05
+Impartial Anonymous Culture (IAC),2,100,80,20,2000,Bottom,k-Median Rule,63.24999999999999,0.65125,36.55
+Impartial Anonymous Culture (IAC),2,100,80,20,2000,Bottom,k-Median-Shapley,37.0,0.80875,15.1
+Impartial Anonymous Culture (IAC),3,100,80,20,2000,Cutoff,Evaluative Voting,98.75,0.6708333333333396,98.75
+Impartial Anonymous Culture (IAC),3,100,80,20,2000,Cutoff,k-Median Rule,83.05,0.7088333333333405,83.05
+Impartial Anonymous Culture (IAC),3,100,80,20,2000,Cutoff,k-Median-Shapley,72.7,0.7553333333333432,72.39999999999999
+Impartial Anonymous Culture (IAC),3,100,80,20,2000,Bottom,Evaluative Voting,86.9,0.7103333333333426,86.9
+Impartial Anonymous Culture (IAC),3,100,80,20,2000,Bottom,k-Median Rule,72.2,0.7273333333333402,56.00000000000001
+Impartial Anonymous Culture (IAC),3,100,80,20,2000,Bottom,k-Median-Shapley,48.0,0.8320000000000098,34.0
+Impartial Anonymous Culture (IAC),4,100,80,20,2000,Cutoff,Evaluative Voting,96.7,0.75825,96.7
+Impartial Anonymous Culture (IAC),4,100,80,20,2000,Cutoff,k-Median Rule,78.2,0.8045,78.2
+Impartial Anonymous Culture (IAC),4,100,80,20,2000,Cutoff,k-Median-Shapley,64.60000000000001,0.8385,64.60000000000001
+Impartial Anonymous Culture (IAC),4,100,80,20,2000,Bottom,Evaluative Voting,96.7,0.75825,96.7
+Impartial Anonymous Culture (IAC),4,100,80,20,2000,Bottom,k-Median Rule,78.2,0.8045,78.2
+Impartial Anonymous Culture (IAC),4,100,80,20,2000,Bottom,k-Median-Shapley,64.60000000000001,0.8385,64.60000000000001
+Polya Urn (alpha=0.2),1,100,80,20,2000,Cutoff,Evaluative Voting,95.7,0.043,95.7
+Polya Urn (alpha=0.2),1,100,80,20,2000,Cutoff,k-Median Rule,66.45,0.3355,66.45
+Polya Urn (alpha=0.2),1,100,80,20,2000,Cutoff,k-Median-Shapley,52.75,0.4725,46.1
+Polya Urn (alpha=0.2),1,100,80,20,2000,Bottom,Evaluative Voting,25.05,0.7495,25.05
+Polya Urn (alpha=0.2),1,100,80,20,2000,Bottom,k-Median Rule,47.3,0.527,17.849999999999998
+Polya Urn (alpha=0.2),1,100,80,20,2000,Bottom,k-Median-Shapley,35.949999999999996,0.6405,7.85
+Polya Urn (alpha=0.2),2,100,80,20,2000,Cutoff,Evaluative Voting,97.89999999999999,0.5105,97.89999999999999
+Polya Urn (alpha=0.2),2,100,80,20,2000,Cutoff,k-Median Rule,79.0,0.57975,79.0
+Polya Urn (alpha=0.2),2,100,80,20,2000,Cutoff,k-Median-Shapley,64.7,0.657,58.95
+Polya Urn (alpha=0.2),2,100,80,20,2000,Bottom,Evaluative Voting,56.2,0.719,56.2
+Polya Urn (alpha=0.2),2,100,80,20,2000,Bottom,k-Median Rule,65.14999999999999,0.6435,36.3
+Polya Urn (alpha=0.2),2,100,80,20,2000,Bottom,k-Median-Shapley,48.449999999999996,0.7375,18.05
+Polya Urn (alpha=0.2),3,100,80,20,2000,Cutoff,Evaluative Voting,97.65,0.6745000000000068,97.65
+Polya Urn (alpha=0.2),3,100,80,20,2000,Cutoff,k-Median Rule,78.7,0.7190000000000085,78.7
+Polya Urn (alpha=0.2),3,100,80,20,2000,Cutoff,k-Median-Shapley,68.2,0.7545000000000078,64.4
+Polya Urn (alpha=0.2),3,100,80,20,2000,Bottom,Evaluative Voting,81.0,0.7300000000000103,81.0
+Polya Urn (alpha=0.2),3,100,80,20,2000,Bottom,k-Median Rule,71.2,0.7308333333333396,53.900000000000006
+Polya Urn (alpha=0.2),3,100,80,20,2000,Bottom,k-Median-Shapley,56.45,0.7903333333333414,37.35
+Polya Urn (alpha=0.2),4,100,80,20,2000,Cutoff,Evaluative Voting,94.69999999999999,0.76325,94.69999999999999
+Polya Urn (alpha=0.2),4,100,80,20,2000,Cutoff,k-Median Rule,77.0,0.8075,77.0
+Polya Urn (alpha=0.2),4,100,80,20,2000,Cutoff,k-Median-Shapley,64.64999999999999,0.838375,64.64999999999999
+Polya Urn (alpha=0.2),4,100,80,20,2000,Bottom,Evaluative Voting,94.69999999999999,0.76325,94.69999999999999
+Polya Urn (alpha=0.2),4,100,80,20,2000,Bottom,k-Median Rule,77.0,0.8075,77.0
+Polya Urn (alpha=0.2),4,100,80,20,2000,Bottom,k-Median-Shapley,64.64999999999999,0.838375,64.64999999999999
+Impartial Culture (IC),1,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.0,100.0
+Impartial Culture (IC),1,100,80,20,2000,Cutoff,k-Median Rule,98.35000000000001,0.0165,98.35000000000001
+Impartial Culture (IC),1,100,80,20,2000,Cutoff,k-Median-Shapley,94.15,0.0585,93.95
+Impartial Culture (IC),1,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.0,100.0
+Impartial Culture (IC),1,100,80,20,2000,Bottom,k-Median Rule,96.3,0.037,94.19999999999999
+Impartial Culture (IC),1,100,80,20,2000,Bottom,k-Median-Shapley,78.7,0.213,68.85
+Impartial Culture (IC),2,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.5,100.0
+Impartial Culture (IC),2,100,80,20,2000,Cutoff,k-Median Rule,99.75,0.40825,99.75
+Impartial Culture (IC),2,100,80,20,2000,Cutoff,k-Median-Shapley,98.45,0.454,98.1
+Impartial Culture (IC),2,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.5,100.0
+Impartial Culture (IC),2,100,80,20,2000,Bottom,k-Median Rule,98.7,0.37875,97.05
+Impartial Culture (IC),2,100,80,20,2000,Bottom,k-Median-Shapley,93.25,0.44625,87.3
+Impartial Culture (IC),3,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.6666666666666725,100.0
+Impartial Culture (IC),3,100,80,20,2000,Cutoff,k-Median Rule,99.55000000000001,0.614333333333333,99.55000000000001
+Impartial Culture (IC),3,100,80,20,2000,Cutoff,k-Median-Shapley,99.05000000000001,0.6351666666666677,99.05000000000001
+Impartial Culture (IC),3,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.6666666666666725,100.0
+Impartial Culture (IC),3,100,80,20,2000,Bottom,k-Median Rule,99.25,0.5788333333333302,98.2
+Impartial Culture (IC),3,100,80,20,2000,Bottom,k-Median-Shapley,96.5,0.6155000000000002,95.0
+Impartial Culture (IC),4,100,80,20,2000,Cutoff,Evaluative Voting,100.0,0.75,100.0
+Impartial Culture (IC),4,100,80,20,2000,Cutoff,k-Median Rule,99.3,0.75175,99.3
+Impartial Culture (IC),4,100,80,20,2000,Cutoff,k-Median-Shapley,98.4,0.754,98.4
+Impartial Culture (IC),4,100,80,20,2000,Bottom,Evaluative Voting,100.0,0.75,100.0
+Impartial Culture (IC),4,100,80,20,2000,Bottom,k-Median Rule,99.3,0.75175,99.3
+Impartial Culture (IC),4,100,80,20,2000,Bottom,k-Median-Shapley,98.4,0.754,98.4

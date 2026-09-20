@@ -1,0 +1,42 @@
+================================================================================
+SIMULATION 1: m=5, k<=4, total n=100 (80 truthful + 20 manipulators)
+Trials per cell = 2000  |  INTEGER_MEDIAN = True
+Rank -> Score map = [5, 4, 3, 2, 0]
+================================================================================
+
+[*] Sanity check: integer scores only, admissible range, grade coverage...
+    Mallows (phi=0.7)                      dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    Plackett-Luce                          dtype=int64  min=0  max=5  grades=[0, 2, 3, 4, 5]
+    2D Euclidean                           dtype=int64  min=1  max=5  grades=[1, 2, 3, 4, 5]
+    Impartial Anonymous Culture (IAC)      dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    Polya Urn (alpha=0.2)                  dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    Impartial Culture (IC)                 dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK] All models produce integer scores in {0,...,5}.
+
+[*] Sanity check: aggregated median under even n ...
+    [OK] even n = 2, lower-median per column = [1.0, 3.0, 2.0, 1.0, 0.0] (all integers)
+
+================================================================================
+[*] Base Output Directory:   /home/user/figures/output_median_project/Simulation 1
+[*] Graphs Output Directory: /home/user/figures/output_median_project/Simulation 1/graphs
+[*] Tables Output Directory: /home/user/figures/output_median_project/Simulation 1/tables
+================================================================================
+[*] 24 batches across 2 CPU cores...
+
+Simulating Elections: [1/24] (4.2%)Simulating Elections: [2/24] (8.3%)Simulating Elections: [3/24] (12.5%)Simulating Elections: [4/24] (16.7%)Simulating Elections: [5/24] (20.8%)Simulating Elections: [6/24] (25.0%)Simulating Elections: [7/24] (29.2%)Simulating Elections: [8/24] (33.3%)Simulating Elections: [9/24] (37.5%)Simulating Elections: [10/24] (41.7%)Simulating Elections: [11/24] (45.8%)Simulating Elections: [12/24] (50.0%)Simulating Elections: [13/24] (54.2%)Simulating Elections: [14/24] (58.3%)Simulating Elections: [15/24] (62.5%)Simulating Elections: [16/24] (66.7%)Simulating Elections: [17/24] (70.8%)Simulating Elections: [18/24] (75.0%)Simulating Elections: [19/24] (79.2%)Simulating Elections: [20/24] (83.3%)Simulating Elections: [21/24] (87.5%)Simulating Elections: [22/24] (91.7%)Simulating Elections: [23/24] (95.8%)Simulating Elections: [24/24] (100.0%)
+
+[+] Raw results saved (108.43s).
+[*] Exporting summary tables...
+                          Change_Rate  Success_Rate  Avg_Overlap
+Target Rule                                                     
+Bottom Evaluative Voting       73.038        73.038        0.673
+       k-Median Rule           62.973        50.171        0.684
+       k-Median-Shapley        46.517        33.142        0.774
+Cutoff Evaluative Voting       97.654        97.654        0.489
+       k-Median Rule           76.960        76.960        0.592
+       k-Median-Shapley        62.402        60.452        0.672
+
+================================================================================
+SIMULATION 1 DATA GENERATION COMPLETED SUCCESSFULLY
+Run:  python make_figures.py   (renders the paper-style figures)
+================================================================================
