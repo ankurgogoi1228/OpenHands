@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Manipulation level (\% of the electorate) at which the bottom target first reaches a 50\% success rate. A dash means the threshold was not reached within the simulated 1--49\% range.}
+  \label{tab:sim1-tipping}
+  \begin{tabular}{@{}llS[table-format=2.0]S[table-format=2.0]S[table-format=2.0]@{}}
+    \toprule
+    & & \multicolumn{3}{c}{Committee size $k$} \\
+    \cmidrule(lr){3-5}
+    Culture & Rule & {$2$} & {$3$} & {$4$} \\
+    \midrule
+    \multirow{3}{*}{Mallows ($\varphi=0.7$)} & Evaluative & {20} & {15} & {8} \\
+    & $k$-Median & {29} & {21} & {19} \\
+    & $k$-Median-Shapley & {38} & {34} & {21} \\
+    \midrule
+    \multirow{3}{*}{Plackett--Luce} & Evaluative & {25} & {20} & {11} \\
+    & $k$-Median & {30} & {24} & {15} \\
+    & $k$-Median-Shapley & {41} & {37} & {28} \\
+    \midrule
+    \multirow{3}{*}{2D Euclidean} & Evaluative & {12} & {8} & {5} \\
+    & $k$-Median & {19} & {13} & {10} \\
+    & $k$-Median-Shapley & {35} & {24} & {15} \\
+    \midrule
+    \multirow{3}{*}{IAC} & Evaluative & {18} & {13} & {7} \\
+    & $k$-Median & {24} & {19} & {11} \\
+    & $k$-Median-Shapley & {32} & {26} & {16} \\
+    \midrule
+    \multirow{3}{*}{P\'olya Urn ($\alpha=0.2$)} & Evaluative & {20} & {14} & {8} \\
+    & $k$-Median & {25} & {19} & {12} \\
+    & $k$-Median-Shapley & {32} & {25} & {15} \\
+    \midrule
+    \multirow{3}{*}{Impartial Culture} & Evaluative & {6} & {4} & {2} \\
+    & $k$-Median & {9} & {7} & {5} \\
+    & $k$-Median-Shapley & {12} & {8} & {5} \\
+    \bottomrule
+  \end{tabular}
+\end{table}

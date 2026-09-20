@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Success Rate (\%) under the bottom attack, committee size $k=4$. Manipulators are a share of the fixed 100-voter electorate.}
+  \label{tab:sim1-bottom-success_rate-k4}
+  \begin{tabular}{@{}llS[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]@{}}
+    \toprule
+    & & \multicolumn{5}{c}{Manipulators (\% of electorate)} \\
+    \cmidrule(lr){3-7}
+    Culture & Rule & {$10\%$} & {$20\%$} & {$30\%$} & {$40\%$} & {$49\%$} \\
+    \midrule
+    \multirow{3}{*}{Mallows ($\varphi=0.7$)} & Evaluative & 67.70 & 99.90 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 13.60 & 60.60 & 97.90 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 12.70 & 48.20 & 74.40 & 100.00 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{Plackett--Luce} & Evaluative & 46.20 & 78.10 & 97.40 & 100.00 & 100.00 \\
+    & $k$-Median & 36.30 & 65.30 & 85.20 & 97.50 & 100.00 \\
+    & $k$-Median-Shapley & 16.40 & 34.10 & 57.00 & 85.70 & 99.90 \\
+    \midrule
+    \multirow{3}{*}{2D Euclidean} & Evaluative & 90.00 & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 54.40 & 88.30 & 99.50 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 37.30 & 66.80 & 84.90 & 95.60 & 99.70 \\
+    \midrule
+    \multirow{3}{*}{IAC} & Evaluative & 68.50 & 96.40 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 46.60 & 77.00 & 96.10 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 34.50 & 62.80 & 87.50 & 98.90 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{P\'olya Urn ($\alpha=0.2$)} & Evaluative & 66.10 & 95.60 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 45.10 & 76.20 & 94.90 & 99.60 & 100.00 \\
+    & $k$-Median-Shapley & 36.00 & 63.40 & 86.40 & 98.20 & 99.90 \\
+    \midrule
+    \multirow{3}{*}{Impartial Culture} & Evaluative & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 81.10 & 99.60 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 79.20 & 97.90 & 100.00 & 100.00 & 100.00 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

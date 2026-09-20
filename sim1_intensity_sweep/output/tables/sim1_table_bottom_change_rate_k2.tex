@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Change Rate (\%) under the bottom attack, committee size $k=2$. Manipulators are a share of the fixed 100-voter electorate.}
+  \label{tab:sim1-bottom-change_rate-k2}
+  \begin{tabular}{@{}llS[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]@{}}
+    \toprule
+    & & \multicolumn{5}{c}{Manipulators (\% of electorate)} \\
+    \cmidrule(lr){3-7}
+    Culture & Rule & {$10\%$} & {$20\%$} & {$30\%$} & {$40\%$} & {$49\%$} \\
+    \midrule
+    \multirow{3}{*}{Mallows ($\varphi=0.7$)} & Evaluative & 0.30 & 52.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 0.90 & 7.00 & 62.50 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 8.00 & 7.20 & 16.30 & 82.90 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{Plackett--Luce} & Evaluative & 3.30 & 29.20 & 75.70 & 99.70 & 100.00 \\
+    & $k$-Median & 30.50 & 46.80 & 62.90 & 91.20 & 100.00 \\
+    & $k$-Median-Shapley & 15.70 & 21.20 & 26.70 & 55.90 & 99.30 \\
+    \midrule
+    \multirow{3}{*}{2D Euclidean} & Evaluative & 38.40 & 98.20 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 44.70 & 75.00 & 92.50 & 99.10 & 100.00 \\
+    & $k$-Median-Shapley & 37.20 & 49.90 & 64.80 & 84.30 & 99.30 \\
+    \midrule
+    \multirow{3}{*}{IAC} & Evaluative & 10.80 & 63.30 & 97.20 & 100.00 & 100.00 \\
+    & $k$-Median & 34.10 & 62.60 & 86.10 & 98.80 & 100.00 \\
+    & $k$-Median-Shapley & 24.90 & 34.70 & 60.90 & 91.60 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{P\'olya Urn ($\alpha=0.2$)} & Evaluative & 7.80 & 53.90 & 93.90 & 99.90 & 100.00 \\
+    & $k$-Median & 38.10 & 63.50 & 86.40 & 98.10 & 100.00 \\
+    & $k$-Median-Shapley & 28.90 & 46.00 & 69.80 & 90.20 & 99.80 \\
+    \midrule
+    \multirow{3}{*}{Impartial Culture} & Evaluative & 95.60 & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 84.50 & 99.30 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 69.60 & 92.40 & 99.70 & 100.00 & 100.00 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

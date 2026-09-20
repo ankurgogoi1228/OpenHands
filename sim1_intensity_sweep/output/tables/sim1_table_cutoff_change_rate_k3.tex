@@ -1,0 +1,36 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Change Rate (\%) under the cutoff attack, committee size $k=3$. Manipulators are a share of the fixed 100-voter electorate.}
+  \label{tab:sim1-cutoff-change_rate-k3}
+  \begin{tabular}{@{}llS[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]S[table-format=3.2]@{}}
+    \toprule
+    & & \multicolumn{5}{c}{Manipulators (\% of electorate)} \\
+    \cmidrule(lr){3-7}
+    Culture & Rule & {$10\%$} & {$20\%$} & {$30\%$} & {$40\%$} & {$49\%$} \\
+    \midrule
+    \multirow{3}{*}{Mallows ($\varphi=0.7$)} & Evaluative & 75.90 & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 15.70 & 68.40 & 99.50 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 19.90 & 41.10 & 79.20 & 99.60 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{Plackett--Luce} & Evaluative & 65.70 & 94.90 & 99.90 & 100.00 & 100.00 \\
+    & $k$-Median & 47.70 & 80.70 & 96.60 & 99.60 & 100.00 \\
+    & $k$-Median-Shapley & 28.00 & 47.00 & 71.10 & 93.60 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{2D Euclidean} & Evaluative & 94.90 & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 57.70 & 88.70 & 99.00 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 49.30 & 71.80 & 85.40 & 96.00 & 99.90 \\
+    \midrule
+    \multirow{3}{*}{IAC} & Evaluative & 79.90 & 99.10 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 52.10 & 83.10 & 97.50 & 99.90 & 100.00 \\
+    & $k$-Median-Shapley & 42.10 & 70.20 & 92.10 & 99.30 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{P\'olya Urn ($\alpha=0.2$)} & Evaluative & 75.50 & 97.40 & 99.90 & 100.00 & 100.00 \\
+    & $k$-Median & 47.20 & 80.10 & 96.60 & 99.70 & 100.00 \\
+    & $k$-Median-Shapley & 45.10 & 70.20 & 87.80 & 97.90 & 100.00 \\
+    \midrule
+    \multirow{3}{*}{Impartial Culture} & Evaluative & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median & 89.40 & 99.70 & 100.00 & 100.00 & 100.00 \\
+    & $k$-Median-Shapley & 89.30 & 98.90 & 99.90 & 100.00 & 100.00 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

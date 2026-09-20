@@ -1,0 +1,74 @@
+================================================================================
+SIMULATION 1 (intensity sweep): median-based committee selection
+[*] Design: n = 100 voters fixed; manipulators 1% ... 49% (1 ... 49 voters); honest 51 ... 99
+[*] m = 5 candidates, k = [2, 3, 4], attacks = ['Cutoff', 'Bottom']
+
+[*] Sanity check: integer scores, range [0,5], grade coverage (20000 voters per model)...
+    [OK ] Mallows (phi=0.7)                      dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Plackett-Luce                          dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] 2D Euclidean                           dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Impartial Anonymous Culture (IAC)      dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Polya Urn (alpha=0.2)                  dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK ] Impartial Culture (IC)                 dtype=int64  min=0  max=5  grades=[0, 1, 2, 3, 4, 5]
+    [OK] All six models produce integers in {0,...,5} and use every grade.
+[*] Sanity check: lower median (even n) = [1.0, 3.0, 2.0, 1.0, 0.0]  [OK]
+[*] Sanity check: vectorised Shapley == reference loop (max |diff| = 1.33e-15); 105 non-tied top-k sets matched, 15 exact ties; efficiency |sum(phi) - v(C)| = 0.00e+00  [OK]
+================================================================================
+[*] Output base : /home/user/sim2/output_median_project/Simulation 1
+[*] Figures     : /home/user/sim2/output_median_project/Simulation 1/graphs   (all figures, one folder)
+[*] Tables      : /home/user/sim2/output_median_project/Simulation 1/tables
+================================================================================
+[*] 6 culture tasks on 2 cores; each task sweeps 49 manipulation levels x 3 committee sizes x 2 attacks x 3 rules
+
+Cultures:   0%|          | 0/6 [00:00<?, ?culture/s]Cultures:  17%|█▋        | 1/6 [00:47<03:56, 47.24s/culture]Cultures:  33%|███▎      | 2/6 [00:48<01:20, 20.04s/culture]Cultures:  50%|█████     | 3/6 [01:27<01:26, 28.69s/culture]Cultures:  67%|██████▋   | 4/6 [01:28<00:35, 17.80s/culture]Cultures:  83%|████████▎ | 5/6 [02:06<00:25, 25.18s/culture]Cultures: 100%|██████████| 6/6 [02:08<00:00, 17.21s/culture]Cultures: 100%|██████████| 6/6 [02:08<00:00, 21.39s/culture]
+    Mallows (phi=0.7)                      47.1s  (1000 trials)
+    Plackett-Luce                          48.2s  (1000 trials)
+    2D Euclidean                           40.1s  (1000 trials)
+    Impartial Anonymous Culture (IAC)      40.1s  (1000 trials)
+    Polya Urn (alpha=0.2)                  39.4s  (1000 trials)
+    Impartial Culture (IC)                 40.0s  (1000 trials)
+[+] 5292 rows written to /home/user/sim2/output_median_project/Simulation 1/sim1_raw_results.csv  (128.4s)
+
+[*] Exporting tables -> /home/user/sim2/output_median_project/Simulation 1/tables
+    [+] sim1_success_rate_cutoff_by_intensity.csv
+    [+] sim1_change_rate_cutoff_by_intensity.csv
+    [+] sim1_avg_overlap_cutoff_by_intensity.csv
+    [+] sim1_success_rate_bottom_by_intensity.csv
+    [+] sim1_change_rate_bottom_by_intensity.csv
+    [+] sim1_avg_overlap_bottom_by_intensity.csv
+    [+] sim1_mean_over_cultures_success_rate_cutoff.csv
+    [+] sim1_mean_over_cultures_change_rate_cutoff.csv
+    [+] sim1_mean_over_cultures_success_rate_bottom.csv
+    [+] sim1_mean_over_cultures_change_rate_bottom.csv
+    [+] sim1_tipping_points_bottom.csv
+    [+] sim1_table_cutoff_success_rate_k2.tex
+    [+] sim1_table_cutoff_success_rate_k3.tex
+    [+] sim1_table_cutoff_success_rate_k4.tex
+    [+] sim1_table_cutoff_change_rate_k2.tex
+    [+] sim1_table_cutoff_change_rate_k3.tex
+    [+] sim1_table_cutoff_change_rate_k4.tex
+    [+] sim1_table_bottom_success_rate_k2.tex
+    [+] sim1_table_bottom_success_rate_k3.tex
+    [+] sim1_table_bottom_success_rate_k4.tex
+    [+] sim1_table_bottom_change_rate_k2.tex
+    [+] sim1_table_bottom_change_rate_k3.tex
+    [+] sim1_table_bottom_change_rate_k4.tex
+    [+] sim1_table_tipping_points.tex
+
+[*] Rendering figures -> /home/user/sim2/output_median_project/Simulation 1/graphs
+    [+] fig01_cutoff_change_rate.png
+    [+] fig02_cutoff_success_rate.png
+    [+] fig03_bottom_change_rate.png
+    [+] fig04_bottom_success_rate.png
+    [+] fig05_cutoff_overlap.png
+    [+] fig06_bottom_dual_metric.png
+    [+] fig07_success_heatmap.png
+    [+] fig08_tipping_points.png
+    [+] fig09_aggregate_summary.png
+    [+] fig10_change_vs_success_gap.png
+    [+] fig11_median_advantage.png
+    [+] fig12_crossing_vs_committee_size.png
+
+================================================================================
+SIMULATION 1 COMPLETED SUCCESSFULLY
+================================================================================
