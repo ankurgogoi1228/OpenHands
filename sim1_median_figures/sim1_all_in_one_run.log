@@ -26,7 +26,7 @@ Rank-model integer noise = (0.1, 0.8, 0.1)  |  Euclidean scale = 'realized-max'
 
 Simulating Elections: [1/18] (5.6%)Simulating Elections: [2/18] (11.1%)Simulating Elections: [3/18] (16.7%)Simulating Elections: [4/18] (22.2%)Simulating Elections: [5/18] (27.8%)Simulating Elections: [6/18] (33.3%)Simulating Elections: [7/18] (38.9%)Simulating Elections: [8/18] (44.4%)Simulating Elections: [9/18] (50.0%)Simulating Elections: [10/18] (55.6%)Simulating Elections: [11/18] (61.1%)Simulating Elections: [12/18] (66.7%)Simulating Elections: [13/18] (72.2%)Simulating Elections: [14/18] (77.8%)Simulating Elections: [15/18] (83.3%)Simulating Elections: [16/18] (88.9%)Simulating Elections: [17/18] (94.4%)Simulating Elections: [18/18] (100.0%)
 
-[+] Raw results saved (49.13s).
+[+] Raw results saved (55.66s).
 [*] Exporting summary tables...
                           Change_Rate  Success_Rate  Avg_Overlap
 Target Rule                                                     
@@ -36,12 +36,25 @@ Bottom Evaluative Voting       82.239        82.239        0.715
 Cutoff Evaluative Voting       97.511        97.511        0.646
        k-Median Rule           79.728        79.728        0.694
        k-Median-Shapley        65.289        64.231        0.756
-Traceback (most recent call last):
-  File "/home/user/sim1_single/sim1_median_committee.py", line 857, in <module>
-    main()
-  File "/home/user/sim1_single/sim1_median_committee.py", line 846, in main
-    render_figures(df, base_dir, graphs_dir, tables_dir, main_k)
-  File "/home/user/sim1_single/sim1_median_committee.py", line 737, in render_figures
-    print(f"\n[*] Rendering figures for k in {{{', '.join(map(str, main_k))}}}  ({context})")
-                                                                   ^^^^^^
-NameError: name 'main_k' is not defined. Did you mean: 'main_df'?
+
+[*] Rendering figures for k in {2, 3, 4}  (80 truthful + 20 manipulators, 2,000 trials per cell)
+[*] ALL figures go to one folder: /home/user/sim1_single/output_median_project/Simulation 1/graphs
+
+    [+] sim1_cutoff_change_rate.png  /  sim1_cutoff_change_rate.pdf
+    [+] sim1_overlap_cutoff.png  /  sim1_overlap_cutoff.pdf
+    [+] sim1_bottom_change_and_success.png  /  sim1_bottom_change_and_success.pdf
+    [+] sim1_aggregate_comparison.png  /  sim1_aggregate_comparison.pdf
+
+[*] Rendering the remaining figures for k in {2, 3, 4} (same folder)
+    [+] sim1_cutoff_success_rate.png  /  sim1_cutoff_success_rate.pdf
+    [+] sim1_bottom_change_rate.png  /  sim1_bottom_change_rate.pdf
+
+[*] Exporting LaTeX tables...
+    [+] sim1_table_cutoff_change_rate.tex
+    [+] sim1_table_bottom_change_rate.tex
+    [+] sim1_table_bottom_success_rate.tex
+
+[*] Done. PNG (300 dpi) and PDF (vector) versions were written.
+================================================================================
+SIMULATION 1 COMPLETED SUCCESSFULLY
+================================================================================
