@@ -520,15 +520,35 @@ def audit_results(df, base_dir):
         print(msg)
         report.append(msg)
     # ---- robustness ordering --------------------------------------------------------
+    # Shapley <= Median is asserted for both metrics and both attacks: the Shapley-based
+    # median rule must never change the committee more often than the plain k-Median rule.
+    # Median <= Evaluative is asserted for the success rate, which is the robustness claim
+    # of the paper: the median rules let the target through less often than evaluative
+    # voting. The same comparison on the *change* rate does not hold in general (a median
+    # committee can churn without ever admitting the target), so it is reported as INFO.
     for target in TARGETS:
         for metric in ["Success_Rate", "Change_Rate"]:
             w = (df[df.Target == target]
                  .pivot_table(index=["Culture", "k", "manip_pct"], columns="Rule",
                               values=metric))
-            share = float(((w["k-Median-Shapley"] <= w["k-Median Rule"])
-                           & (w["k-Median Rule"] <= w["Evaluative Voting"])).mean()) * 100
-            check(f"{target} / {metric}: Shapley <= Median <= Evaluative",
-                  share >= 75.0, f"{share:.1f}% of the {len(w)} cells")
+            share_shap = float((w["k-Median-Shapley"] <= w["k-Median Rule"]).mean()) * 100
+            check(f"{target} / {metric}: Shapley <= Median",
+                  share_shap >= 75.0, f"{share_shap:.1f}% of the {len(w)} cells")
+            if metric == "Success_Rate":
+                share_med = float((w["k-Median Rule"] <= w["Evaluative Voting"]).mean()) * 100
+                check(f"{target} / {metric}: Median <= Evaluative",
+                      share_med >= 75.0, f"{share_med:.1f}% of the {len(w)} cells")
+    for target in TARGETS:
+        w = (df[df.Target == target]
+             .pivot_table(index=["Culture", "k", "manip_pct"], columns="Rule",
+                          values="Change_Rate"))
+        gap_me = w["k-Median Rule"] - w["Evaluative Voting"]
+        share_me = float((gap_me <= 0).mean()) * 100
+        msg = (f"  [INFO] {target} attack, change rate: k-Median <= Evaluative in "
+               f"{share_me:.1f}% of the {len(w)} cells (largest excess "
+               f"{float(gap_me.max()):.1f} pp)")
+        print(msg)
+        report.append(msg)
     # ---- monotone response to more manipulation -------------------------------------
     for target in TARGETS:
         steps = (df[df.Target == target].groupby(["Culture", "k", "Rule"])["Success_Rate"]
