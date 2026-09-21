@@ -35,6 +35,13 @@ SCORE DISCIPLINE (STRICT)
       probabilities (0.1, 0.8, 0.1), clipped to [0,5]. 2D Euclidean rescales by the largest
       realised distance so that grade 0 is attainable. The sanity check enforces that all
       six models use all six grades.
+
+PROGRESS BARS
+    Trial-level progress bars (one per worker, pinned to its own terminal line), plus
+    bars for the culture, table and figure stages. They hide themselves automatically
+    when the output is redirected to a file; set SHOW_TRIAL_PROGRESS = False to switch
+    the trial bars off entirely.
+
 OUTPUT  ->  D:\PYTHON\Project - Median\Simulation 1-49%\   (or ./output_median_project/Simulation 1-49%)
     sim1_raw_results.csv                     full long-format results
     graphs/                                  ALL figures, one folder, PNG (300 dpi) + PDF
@@ -59,17 +66,28 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, current_process
 try:
     from tqdm import tqdm
 except ImportError:
-    def tqdm(iterable, total=None, desc="Processing", unit="task"):
+    def tqdm(iterable, total=None, desc="Processing", unit="task", **kwargs):
         total = total or len(iterable)
         for i, item in enumerate(iterable):
             yield item
             pct = ((i + 1) / total) * 100
             print(f"\r{desc}: [{i+1}/{total}] ({pct:.1f}%)", end="", flush=True)
         print()
+
+
+def tqdm_write(msg):
+    """Print a message without breaking the active progress bars."""
+    writer = getattr(tqdm, "write", None)
+    if callable(writer):
+        writer(msg)
+    else:
+        print(msg)
+
+
 np.random.seed(42)
 # ======================================================================================
 # 1. CONFIGURATION
@@ -79,6 +97,7 @@ N_VOTERS = 100             # FIXED total electorate
 MANIP_PCT_MIN = 1          # 1%  of the electorate -> 1 manipulator
 MANIP_PCT_MAX = 49         # 49% of the electorate -> 49 manipulators
 NUM_ITERATIONS = 1000      # Monte Carlo trials per culture (each trial covers all x, k)
+SHOW_TRIAL_PROGRESS = True  # one progress bar per worker (hidden when output is piped)
 # -----------------------------------------------------------------------------------------
 # Output folder created under the base path:  D:\PYTHON\Project - Median\Simulation 1-49%
 OUTPUT_DIRNAME = "Simulation 1-49%"
@@ -278,6 +297,29 @@ BEST_MODELS = {
 # ======================================================================================
 
 
+def _worker_slot(fallback=0):
+    """Terminal line for this worker's progress bar (0, 1, 2, ... packed from the top).
+
+    The pool reuses processes, so the slot comes from the process identity rather than
+    from the task index; the main process (no identity) keeps the fallback.
+    """
+    try:
+        ident = getattr(current_process(), "_identity", None)
+        if ident:
+            return max(int(ident[0]) - 1, 0)
+    except Exception:
+        pass
+    return fallback
+
+
+def _task_label(cult_name):
+    """Short culture name for the progress bar: 'Impartial Culture (IC)' -> 'IC'."""
+    base = cult_name.split(" (")[0]
+    if "(" in cult_name and len(base) > 18:
+        return cult_name[cult_name.find("(") + 1:cult_name.find(")")]
+    return base
+
+
 def run_culture(args):
     cult_name, trials, seed = args
     np.random.seed(seed)
@@ -289,6 +331,11 @@ def run_culture(args):
     overlap = np.zeros((n_x, n_k, n_t, n_r))
     attacked = np.zeros((N_VOTERS, M), dtype=np.int64)
     t0 = time.time()
+
+    bar = tqdm(total=trials, desc=f"{_task_label(cult_name):<14s}", unit="trial",
+               position=_worker_slot(), leave=False,
+               disable=None if SHOW_TRIAL_PROGRESS else True)
+
     for _ in range(trials):
         pool = gen_fn(MAX_HONEST, M)                    # 99 honest voters, reused below
         for ix, n_manip in enumerate(MANIP_COUNTS):
@@ -310,6 +357,9 @@ def run_culture(args):
                         overlap[ix, ik, it, ir] += len(c_h & c_post) / k
                         if target in c_post:
                             success[ix, ik, it, ir] += 1
+        bar.update(1)
+    bar.close()
+
     rows = []
     for ix, n_manip in enumerate(MANIP_COUNTS):
         for ik, k in enumerate(COMMITTEE_SIZES):
@@ -860,79 +910,95 @@ def fig_advantage(df, out_png, out_pdf, suptitle):
 
 
 def make_all_figures(df, graphs_dir):
+    """Render every figure, with a progress bar over the 12 figure jobs."""
     print(f"\n[*] Rendering figures -> {graphs_dir}")
-    design = "Manipulation-intensity sweep of committee selection"
-    fig_intensity_grid(df, "Cutoff", "Change_Rate",
-                       os.path.join(graphs_dir, "fig01_cutoff_change_rate.png"),
-                       os.path.join(graphs_dir, "fig01_cutoff_change_rate.pdf"),
-                       "Committee change rate (%)",
-                       "Cutoff attack: committee change rate")
-    fig_intensity_grid(df, "Cutoff", "Success_Rate",
-                       os.path.join(graphs_dir, "fig02_cutoff_success_rate.png"),
-                       os.path.join(graphs_dir, "fig02_cutoff_success_rate.pdf"),
-                       "Target success rate (%)",
-                       "Cutoff attack: target success rate")
-    fig_intensity_grid(df, "Bottom", "Change_Rate",
-                       os.path.join(graphs_dir, "fig03_bottom_change_rate.png"),
-                       os.path.join(graphs_dir, "fig03_bottom_change_rate.pdf"),
-                       "Committee change rate (%)",
-                       "Bottom attack: committee change rate")
-    fig_intensity_grid(df, "Bottom", "Success_Rate",
-                       os.path.join(graphs_dir, "fig04_bottom_success_rate.png"),
-                       os.path.join(graphs_dir, "fig04_bottom_success_rate.pdf"),
-                       "Target success rate (%)",
-                       "Bottom attack: target success rate")
-    fig_intensity_grid(df, "Cutoff", "Avg_Overlap",
-                       os.path.join(graphs_dir, "fig05_cutoff_overlap.png"),
-                       os.path.join(graphs_dir, "fig05_cutoff_overlap.pdf"),
-                       "Average overlap with the honest committee",
-                       "Cutoff attack: average overlap")
-    fig_dual_metric(df, os.path.join(graphs_dir, "fig06_bottom_dual_metric.png"),
-                    os.path.join(graphs_dir, "fig06_bottom_dual_metric.pdf"),
-                    "Bottom attack: change rate vs target success rate")
-    fig_heatmap(df, os.path.join(graphs_dir, "fig07_success_heatmap.png"),
-                os.path.join(graphs_dir, "fig07_success_heatmap.pdf"),
-                "Bottom-target success map")
-    fig_tipping_points(df, os.path.join(graphs_dir, "fig08_tipping_points.png"),
-                       os.path.join(graphs_dir, "fig08_tipping_points.pdf"),
-                       "How much manipulation does it take to elect the bottom candidate?")
-    fig_aggregate(df, os.path.join(graphs_dir, "fig09_aggregate_summary.png"),
-                  os.path.join(graphs_dir, "fig09_aggregate_summary.pdf"),
-                  "Aggregate summary over the six preference models")
-    fig_divergence(df, os.path.join(graphs_dir, "fig10_change_vs_success_gap.png"),
-                   os.path.join(graphs_dir, "fig10_change_vs_success_gap.pdf"),
-                   "Bottom attack: committee change vs manipulation success")
-    fig_advantage(df, os.path.join(graphs_dir, "fig11_median_advantage.png"),
-                  os.path.join(graphs_dir, "fig11_median_advantage.pdf"),
-                  "Bottom attack: robustness gain of the median rules")
-    fig_crossing_vs_k(df, os.path.join(graphs_dir, "fig12_crossing_vs_committee_size.png"),
-                      os.path.join(graphs_dir, "fig12_crossing_vs_committee_size.pdf"),
-                      "How much manipulation is needed to elect the bottom candidate?")
+
+    def png(name):
+        return os.path.join(graphs_dir, name + ".png")
+
+    def pdf(name):
+        return os.path.join(graphs_dir, name + ".pdf")
+
+    jobs = [
+        (fig_intensity_grid, ("Cutoff", "Change_Rate"),
+         dict(out_png=png("fig01_cutoff_change_rate"),
+              out_pdf=pdf("fig01_cutoff_change_rate"),
+              ylabel="Committee change rate (%)",
+              suptitle="Cutoff attack: committee change rate")),
+        (fig_intensity_grid, ("Cutoff", "Success_Rate"),
+         dict(out_png=png("fig02_cutoff_success_rate"),
+              out_pdf=pdf("fig02_cutoff_success_rate"),
+              ylabel="Target success rate (%)",
+              suptitle="Cutoff attack: target success rate")),
+        (fig_intensity_grid, ("Bottom", "Change_Rate"),
+         dict(out_png=png("fig03_bottom_change_rate"),
+              out_pdf=pdf("fig03_bottom_change_rate"),
+              ylabel="Committee change rate (%)",
+              suptitle="Bottom attack: committee change rate")),
+        (fig_intensity_grid, ("Bottom", "Success_Rate"),
+         dict(out_png=png("fig04_bottom_success_rate"),
+              out_pdf=pdf("fig04_bottom_success_rate"),
+              ylabel="Target success rate (%)",
+              suptitle="Bottom attack: target success rate")),
+        (fig_intensity_grid, ("Cutoff", "Avg_Overlap"),
+         dict(out_png=png("fig05_cutoff_overlap"),
+              out_pdf=pdf("fig05_cutoff_overlap"),
+              ylabel="Average overlap with the honest committee",
+              suptitle="Cutoff attack: average overlap")),
+        (fig_dual_metric, (),
+         dict(out_png=png("fig06_bottom_dual_metric"),
+              out_pdf=pdf("fig06_bottom_dual_metric"),
+              suptitle="Bottom attack: change rate vs target success rate")),
+        (fig_heatmap, (),
+         dict(out_png=png("fig07_success_heatmap"), out_pdf=pdf("fig07_success_heatmap"),
+              suptitle="Bottom-target success map")),
+        (fig_tipping_points, (),
+         dict(out_png=png("fig08_tipping_points"), out_pdf=pdf("fig08_tipping_points"),
+              suptitle="How much manipulation does it take to elect the bottom candidate?")),
+        (fig_aggregate, (),
+         dict(out_png=png("fig09_aggregate_summary"), out_pdf=pdf("fig09_aggregate_summary"),
+              suptitle="Aggregate summary over the six preference models")),
+        (fig_divergence, (),
+         dict(out_png=png("fig10_change_vs_success_gap"),
+              out_pdf=pdf("fig10_change_vs_success_gap"),
+              suptitle="Bottom attack: committee change vs manipulation success")),
+        (fig_advantage, (),
+         dict(out_png=png("fig11_median_advantage"), out_pdf=pdf("fig11_median_advantage"),
+              suptitle="Bottom attack: robustness gain of the median rules")),
+        (fig_crossing_vs_k, (),
+         dict(out_png=png("fig12_crossing_vs_committee_size"),
+              out_pdf=pdf("fig12_crossing_vs_committee_size"),
+              suptitle="How much manipulation is needed to elect the bottom candidate?")),
+    ]
+
+    for fn, args, kwargs in tqdm(jobs, desc="Figures", unit="figure", disable=None):
+        fn(df, *args, **kwargs)
+    print(f"    [OK] {len(jobs)} figures written to {graphs_dir}")
 # ======================================================================================
 # 9. TABLES
 # ======================================================================================
 
 
-def export_tables(df, tables_dir):
-    print(f"\n[*] Exporting tables -> {tables_dir}")
-    for target in TARGETS:
-        for metric, nd in [("Success_Rate", 2), ("Change_Rate", 2), ("Avg_Overlap", 3)]:
-            sub = df[df["Target"] == target]
-            piv = (sub.pivot_table(index=["Culture", "k", "Rule"], columns="manip_pct",
-                                   values=metric).round(nd))
-            name = f"sim1_{metric.lower()}_{target.lower()}_by_intensity.csv"
-            piv.to_csv(os.path.join(tables_dir, name))
-            print(f"    [+] {name}")
-    # mean over cultures (compact overview)
-    for target in TARGETS:
-        sub = df[df["Target"] == target]
-        for metric in ["Success_Rate", "Change_Rate"]:
-            piv = (sub.pivot_table(index=["k", "Rule"], columns="manip_pct", values=metric)
-                   .round(2))
-            name = f"sim1_mean_over_cultures_{metric.lower()}_{target.lower()}.csv"
-            piv.to_csv(os.path.join(tables_dir, name))
-            print(f"    [+] {name}")
-    # tipping points (first intensity with bottom-target success >= 50%)
+def _export_pivot(df, tables_dir, target, metric, nd):
+    sub = df[df["Target"] == target]
+    piv = (sub.pivot_table(index=["Culture", "k", "Rule"], columns="manip_pct",
+                           values=metric).round(nd))
+    name = f"sim1_{metric.lower()}_{target.lower()}_by_intensity.csv"
+    piv.to_csv(os.path.join(tables_dir, name))
+    print(f"    [+] {name}")
+
+
+def _export_mean_pivot(df, tables_dir, target, metric):
+    sub = df[df["Target"] == target]
+    piv = (sub.pivot_table(index=["k", "Rule"], columns="manip_pct", values=metric)
+           .round(2))
+    name = f"sim1_mean_over_cultures_{metric.lower()}_{target.lower()}.csv"
+    piv.to_csv(os.path.join(tables_dir, name))
+    print(f"    [+] {name}")
+
+
+def _tipping_frame(df):
+    """First manipulation level at which the bottom target reaches a 50% success rate."""
     rows = []
     for cult in PANEL_ORDER:
         for k in COMMITTEE_SIZES:
@@ -941,18 +1007,41 @@ def export_tables(df, tables_dir):
                        & (df["Target"] == "Bottom")].sort_values("manip_pct")
                 hit = d[d["Success_Rate"] >= 50.0]["manip_pct"]
                 rows.append({"Culture": cult, "k": k, "Rule": rule,
-                             "tipping_pct_50": (int(hit.iloc[0]) if len(hit)
-                                                else None),
+                             "tipping_pct_50": (int(hit.iloc[0]) if len(hit) else None),
                              "success_at_49pct": round(float(d["Success_Rate"].iloc[-1]), 2)})
-    tip = pd.DataFrame(rows)
+    return pd.DataFrame(rows)
+
+
+def _export_tipping_points(df, tables_dir):
+    tip = _tipping_frame(df)
     tip.to_csv(os.path.join(tables_dir, "sim1_tipping_points_bottom.csv"), index=False)
     print("    [+] sim1_tipping_points_bottom.csv")
+
+
+def export_tables(df, tables_dir):
+    """Write every table file, with a progress bar over the table jobs."""
+    print(f"\n[*] Exporting tables -> {tables_dir}")
+    jobs = []
+    # per-culture pivot tables
+    for target in TARGETS:
+        for metric, nd in [("Success_Rate", 2), ("Change_Rate", 2), ("Avg_Overlap", 3)]:
+            jobs.append((_export_pivot, (df, tables_dir, target, metric, nd)))
+    # mean over cultures (compact overview)
+    for target in TARGETS:
+        for metric in ["Success_Rate", "Change_Rate"]:
+            jobs.append((_export_mean_pivot, (df, tables_dir, target, metric)))
+    # tipping points
+    jobs.append((_export_tipping_points, (df, tables_dir)))
     # LaTeX: one table per (metric, target, k), rows = culture x rule, cols = anchors
     for target in TARGETS:
         for metric in ["Success_Rate", "Change_Rate"]:
             for k in COMMITTEE_SIZES:
-                _latex_table(df, metric, target, k, tables_dir)
-    _latex_table_tipping(tip, tables_dir)
+                jobs.append((_latex_table, (df, metric, target, k, tables_dir)))
+    jobs.append((_latex_table_tipping, (df, tables_dir)))
+
+    for fn, args in tqdm(jobs, desc="Tables", unit="table", disable=None):
+        fn(*args)
+    print(f"    [OK] {len(jobs)} table files written to {tables_dir}")
 
 
 def _latex_table(df, metric, target, k, tables_dir):
@@ -989,7 +1078,8 @@ def _latex_table(df, metric, target, k, tables_dir):
     print(f"    [+] {name}")
 
 
-def _latex_table_tipping(tip, tables_dir):
+def _latex_table_tipping(df, tables_dir):
+    tip = _tipping_frame(df)
     lines = [r"\begin{table}[htbp]", r"  \centering",
              r"  \caption{Manipulation level (\% of the electorate) at which the bottom "
              r"target first reaches a 50\% success rate. A dash means the threshold was "
@@ -1053,11 +1143,16 @@ def simulate(base_dir):
           f"sizes x {len(TARGETS)} attacks x {len(RULES)} rules\n")
     t0 = time.time()
     rows = []
+    done_trials = 0
     with Pool(processes=workers) as pool:
-        for res, msg in tqdm(pool.imap(run_culture, tasks), total=len(tasks),
-                             desc="Cultures", unit="culture"):
-            rows.extend(res)
-            print(f"    {msg}")
+        # the summary bar sits below the per-worker trial bars
+        with tqdm(pool.imap(run_culture, tasks), total=len(tasks), desc="Cultures",
+                  unit="culture", position=workers, leave=True, disable=None) as bar:
+            for res, msg in bar:
+                rows.extend(res)
+                done_trials += NUM_ITERATIONS
+                bar.set_postfix_str(f"{done_trials:,} trials", refresh=False)
+                tqdm_write(f"  {msg}")
     df = pd.DataFrame(rows)
     csv = os.path.join(base_dir, "sim1_raw_results.csv")
     df.to_csv(csv, index=False)
