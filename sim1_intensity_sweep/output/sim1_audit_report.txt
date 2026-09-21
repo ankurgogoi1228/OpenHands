@@ -1,0 +1,30 @@
+AUDIT REPORT - Simulation 1 (manipulation intensity 1%-49%)
+n = 100 voters fixed, m = 5 candidates, k = [2, 3, 4], trials per cell = 1000
+rows = 5292 (cultures x k x intensities x attacks x rules)
+------------------------------------------------------------------------------
+  [PASS] result rows complete  ->  5292 of 5292
+  [PASS] all six preference cultures  ->  6 cultures
+  [PASS] all committee sizes k = 2, 3, 4  ->  k = [2, 3, 4]
+  [PASS] every integer intensity 1% ... 49%  ->  49 levels
+  [PASS] both attacks present  ->  ['Bottom', 'Cutoff']
+  [PASS] all three rules present  ->  3 rules
+  [PASS] no duplicate cells
+  [PASS] electorate is always 100 voters  ->  min 51 honest, max 49 manipulators
+  [PASS] honest count inside 51 ... 99
+  [PASS] no missing values
+  [PASS] all rates inside [0, 100]  ->  max rate 100.0%
+  [PASS] overlap inside [0, 1]  ->  range 0.273 ... 1.000
+  [PASS] evaluative voting: change rate == success rate (both attacks)  ->  max |diff| = 0.00e+00 pp
+  [PASS] cutoff attack: change rate == success rate for the k-Median rule  ->  max |diff| = 0.00e+00 pp
+  [INFO] cutoff attack, Shapley: change minus success up to 8.3 pp (expected: Shapley can reshuffle the committee without admitting the target)
+  [INFO] bottom attack, k-Median: change minus success up to 36.7 pp
+  [INFO] bottom attack, Shapley: change minus success up to 38.5 pp
+  [PASS] Cutoff / Success_Rate: Shapley <= Median <= Evaluative  ->  91.5% of the 882 cells
+  [PASS] Cutoff / Change_Rate: Shapley <= Median <= Evaluative  ->  89.2% of the 882 cells
+  [PASS] Bottom / Success_Rate: Shapley <= Median <= Evaluative  ->  90.4% of the 882 cells
+  [PASS] Bottom / Change_Rate: Shapley <= Median <= Evaluative  ->  77.9% of the 882 cells
+  [PASS] Cutoff / success rate non-decreasing as manipulation grows  ->  99.2% of consecutive steps
+  [PASS] Bottom / success rate non-decreasing as manipulation grows  ->  99.3% of consecutive steps
+  [PASS] every culture x k reacts to the attack (success exceeds 50% somewhere)  ->  worst case maximum success = 100.0%
+------------------------------------------------------------------------------
+OVERALL: ALL CHECKS PASSED

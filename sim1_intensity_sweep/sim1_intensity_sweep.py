@@ -3,7 +3,6 @@
 ========================================================================================
 SIMULATION 1 (manipulation-intensity sweep): Median-Based Committee Selection
 ========================================================================================
-
 DESIGN
     total electorate        n   = 100 voters  (FIXED for every run)
     manipulators            x   = 1% ... 49% of the electorate  -> 1 ... 49 voters
@@ -14,11 +13,9 @@ DESIGN
                                 Bottom (the worst-ranked candidate)
     rules                       3  ->  Evaluative, k-Median, k-Median-Shapley
     trials                      NUM_ITERATIONS Monte Carlo repetitions per cell
-
     The manipulated electorate is always the full 100 voters: the x manipulators vote the
     extreme integer ballot (5 for their target, 0 for everyone else) and the remaining
     100 - x voters vote honestly. Only the composition changes as x grows, never the size.
-
 COMMON RANDOM NUMBERS
     For every trial a pool of 99 honest voters is drawn once, and intensity x uses the
     first 100 - x voters of that pool. Every intensity therefore faces the same underlying
@@ -26,7 +23,6 @@ COMMON RANDOM NUMBERS
     diluted by independent resampling. Each marginal profile is still a valid sample from
     the culture: prefixes of an i.i.d. sample (and of the sequential Polya urn) are
     themselves valid samples.
-
 SCORE DISCIPLINE (STRICT)
     - All voter scores are integers in {0,1,2,3,4,5}.
     - Rank -> score map (5, 4, 3, 2, 0).
@@ -39,12 +35,10 @@ SCORE DISCIPLINE (STRICT)
       probabilities (0.1, 0.8, 0.1), clipped to [0,5]. 2D Euclidean rescales by the largest
       realised distance so that grade 0 is attainable. The sanity check enforces that all
       six models use all six grades.
-
-OUTPUT  ->  D:\\PYTHON\\Project - Median\\Simulation 1\\   (or ./output_median_project/Simulation 1)
+OUTPUT  ->  D:\PYTHON\Project - Median\Simulation 1-49%\   (or ./output_median_project/Simulation 1-49%)
     sim1_raw_results.csv                     full long-format results
     graphs/                                  ALL figures, one folder, PNG (300 dpi) + PDF
     tables/                                  pivot CSVs, tipping points, LaTeX tables
-
 Command line
 ------------
     python sim1_intensity_sweep.py                     # full run, 1000 trials per cell
@@ -53,14 +47,12 @@ Command line
     python sim1_intensity_sweep.py --skip-simulation   # re-plot an existing CSV
 ========================================================================================
 """
-
 import argparse
 import itertools
 import math
 import os
 import platform
 import time
-
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -68,7 +60,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from multiprocessing import Pool, cpu_count
-
 try:
     from tqdm import tqdm
 except ImportError:
@@ -79,10 +70,7 @@ except ImportError:
             pct = ((i + 1) / total) * 100
             print(f"\r{desc}: [{i+1}/{total}] ({pct:.1f}%)", end="", flush=True)
         print()
-
 np.random.seed(42)
-
-
 # ======================================================================================
 # 1. CONFIGURATION
 # ======================================================================================
@@ -92,26 +80,22 @@ MANIP_PCT_MIN = 1          # 1%  of the electorate -> 1 manipulator
 MANIP_PCT_MAX = 49         # 49% of the electorate -> 49 manipulators
 NUM_ITERATIONS = 1000      # Monte Carlo trials per culture (each trial covers all x, k)
 # -----------------------------------------------------------------------------------------
-
+# Output folder created under the base path:  D:\PYTHON\Project - Median\Simulation 1-49%
+OUTPUT_DIRNAME = "Simulation 1-49%"
 M = 5                      # number of candidates
 SCALE_MAX = 5              # integer score scale {0,1,2,3,4,5}
 COMMITTEE_SIZES = [2, 3, 4]        # k = 1 is a single winner, k = m takes everything
-
 # x is a percentage of a 100-voter electorate, so x% == x voters
 MANIP_COUNTS = list(range(MANIP_PCT_MIN, MANIP_PCT_MAX + 1))
 MAX_HONEST = N_VOTERS - MANIP_PCT_MIN          # largest honest profile needed (99)
-
 RANK_TO_SCORE = np.array([5, 4, 3, 2, 0], dtype=int)
 INTEGER_MEDIAN = True
 PL_RANK_TO_SCORE = RANK_TO_SCORE               # one shared map for both rank-based models
 RANK_MODEL_NOISE = (0.1, 0.8, 0.1)             # integer noise, needed to reach grade 1
 EUCLIDEAN_SCALE = "realized-max"               # "sqrt2" for the paper's exact formula
 REQUIRED_GRADES = set(range(SCALE_MAX + 1))
-
 TARGETS = ['Cutoff', 'Bottom']
 RULES = ['Evaluative Voting', 'k-Median Rule', 'k-Median-Shapley']
-
-
 def smart_median(arr, axis=0):
     """Median returning an integer for even-length input when INTEGER_MEDIAN=True."""
     if not INTEGER_MEDIAN:
@@ -122,23 +106,18 @@ def smart_median(arr, axis=0):
         return np.median(arr, axis=axis)
     sorted_arr = np.sort(arr, axis=axis)
     return np.take(sorted_arr, n // 2 - 1, axis=axis).astype(float)
-
-
 # --- Shapley structures (all 2^m subsets), vectorised ----------------------------------
 subsets_by_len = [[] for _ in range(M + 1)]
 for r in range(M + 1):
     for combo in itertools.combinations(range(M), r):
         subsets_by_len[r].append(combo)
-
 all_subsets = [c for sub in subsets_by_len for c in sub]
 subset_to_idx = {s: i for i, s in enumerate(all_subsets)}
 num_subsets = len(all_subsets)
-
 subset_mask = np.zeros((num_subsets, M), dtype=float)
 for i, T in enumerate(all_subsets):
     for c in T:
         subset_mask[i, c] = 1.0
-
 fact = math.factorial
 # candidate_steps[j] = list of (weight, idx(S), idx(S u {j})) -- kept for the reference
 # implementation and for the equivalence check; the fast path uses the array form below.
@@ -157,8 +136,6 @@ for j in range(M):
     weight_arrays.append(np.array([s[0] for s in steps_j]))
     idx_arrays.append(np.array([s[1] for s in steps_j]))
     idxj_arrays.append(np.array([s[2] for s in steps_j]))
-
-
 # ======================================================================================
 # 2. VOTING RULES
 # ======================================================================================
@@ -166,17 +143,12 @@ def utilitarian_rule(scores, k):
     total = np.sum(scores, axis=0)
     ranking = np.argsort(-total, kind='mergesort')
     return ranking, set(ranking[:k]), total
-
-
 def median_rule(scores, k):
     med = smart_median(scores, axis=0)
     ranking = np.argsort(-med, kind='mergesort')
     return ranking, set(ranking[:k]), med
-
-
 def shapley_median_rule(scores, k):
     """Vectorised Shapley value of the median-based coalition game.
-
     phi_j = sum_{S subseteq C\\{j}} w(|S|) [ v(S u {j}) - v(S) ],  v(S) = median of the
     coalition's summed scores. Identical to the original Python loop; the equivalence is
     asserted by sanity_check_shapley() at start-up.
@@ -189,8 +161,6 @@ def shapley_median_rule(scores, k):
         phi[j] = weight_arrays[j] @ (delta[idxj_arrays[j]] - delta[idx_arrays[j]])
     ranking = np.argsort(-phi, kind='mergesort')
     return ranking, set(ranking[:k]), phi
-
-
 def shapley_median_rule_reference(scores, k):
     """Original step-by-step implementation, kept only for the equivalence check."""
     subset_sums = scores @ subset_mask.T
@@ -202,11 +172,7 @@ def shapley_median_rule_reference(scores, k):
             phi[j] += w * (delta[idx_T_j] - delta[idx_T])
     ranking = np.argsort(-phi, kind='mergesort')
     return ranking, set(ranking[:k]), phi
-
-
 RULE_FUNCTIONS = [utilitarian_rule, median_rule, shapley_median_rule]
-
-
 # ======================================================================================
 # 3. PREFERENCE GENERATIVE MODELS (STRICT INTEGER SCORES)
 # ======================================================================================
@@ -218,8 +184,6 @@ def _add_integer_noise(profile, probs=None, scale_max=SCALE_MAX):
         return profile.astype(np.int64)
     noise = np.random.choice([-1, 0, 1], size=profile.shape, p=list(probs))
     return np.clip(profile + noise, 0, scale_max).astype(np.int64)
-
-
 def generate_mallows(n, m=M, phi=0.7, scale_max=SCALE_MAX):
     profile = np.zeros((n, m), dtype=np.int64)
     for i in range(n):
@@ -232,8 +196,6 @@ def generate_mallows(n, m=M, phi=0.7, scale_max=SCALE_MAX):
         for rank_pos, cand in enumerate(ranking):
             profile[i, cand] = int(RANK_TO_SCORE[rank_pos])
     return _add_integer_noise(profile, scale_max=scale_max)
-
-
 def generate_plackett_luce(n, m=M, scale_max=SCALE_MAX):
     gamma = np.random.gamma(shape=2.5, scale=1.0, size=m)
     profile = np.zeros((n, m), dtype=np.int64)
@@ -249,8 +211,6 @@ def generate_plackett_luce(n, m=M, scale_max=SCALE_MAX):
         for rank_pos, cand in enumerate(ranking):
             profile[i, cand] = int(PL_RANK_TO_SCORE[rank_pos])
     return _add_integer_noise(profile, scale_max=scale_max)
-
-
 def generate_euclidean(n, m=M, dim=2, scale_max=SCALE_MAX):
     candidates = np.random.uniform(0, 1, size=(m, dim))
     voters = np.random.uniform(0, 1, size=(n, dim))
@@ -258,16 +218,12 @@ def generate_euclidean(n, m=M, dim=2, scale_max=SCALE_MAX):
     d_ref = np.sqrt(dim) if EUCLIDEAN_SCALE == "sqrt2" else d.max()
     raw = scale_max * (1.0 - d / d_ref)
     return np.clip(np.floor(raw + 0.5), 0, scale_max).astype(np.int64)
-
-
 def generate_iac(n, m=M, scale_max=SCALE_MAX):
     profile = np.zeros((n, m), dtype=np.int64)
     for j in range(m):
         probs = np.random.dirichlet(np.ones(scale_max + 1))
         profile[:, j] = np.random.choice(scale_max + 1, size=n, p=probs).astype(np.int64)
     return profile
-
-
 def generate_urn(n, m=M, alpha=0.2, scale_max=SCALE_MAX):
     urn = [np.random.randint(0, scale_max + 1, size=m, dtype=np.int64) for _ in range(8)]
     profile = np.zeros((n, m), dtype=np.int64)
@@ -277,12 +233,8 @@ def generate_urn(n, m=M, alpha=0.2, scale_max=SCALE_MAX):
         if np.random.rand() < alpha:
             urn.append(ballot)
     return profile
-
-
 def generate_ic(n, m=M, scale_max=SCALE_MAX):
     return np.random.randint(0, scale_max + 1, size=(n, m), dtype=np.int64)
-
-
 BEST_MODELS = {
     'Mallows (phi=0.7)': generate_mallows,
     'Plackett-Luce': generate_plackett_luce,
@@ -291,8 +243,6 @@ BEST_MODELS = {
     'Polya Urn (alpha=0.2)': generate_urn,
     'Impartial Culture (IC)': generate_ic,
 }
-
-
 # ======================================================================================
 # 4. MONTE CARLO WORKER  (one task per culture; every task sweeps x and k internally)
 # ======================================================================================
@@ -300,16 +250,13 @@ def run_culture(args):
     cult_name, trials, seed = args
     np.random.seed(seed)
     gen_fn = BEST_MODELS[cult_name]
-
     n_x, n_k, n_t, n_r = (len(MANIP_COUNTS), len(COMMITTEE_SIZES),
                           len(TARGETS), len(RULES))
     changed = np.zeros((n_x, n_k, n_t, n_r))
     success = np.zeros((n_x, n_k, n_t, n_r))
     overlap = np.zeros((n_x, n_k, n_t, n_r))
-
     attacked = np.zeros((N_VOTERS, M), dtype=np.int64)
     t0 = time.time()
-
     for _ in range(trials):
         pool = gen_fn(MAX_HONEST, M)                    # 99 honest voters, reused below
         for ix, n_manip in enumerate(MANIP_COUNTS):
@@ -317,7 +264,6 @@ def run_culture(args):
             honest = pool[:n_honest]
             attacked[:n_honest] = honest
             attacked[n_honest:] = 0                     # manipulator block, zeros elsewhere
-
             for ik, k in enumerate(COMMITTEE_SIZES):
                 honest_state = [fn(honest, k)[:2] for fn in RULE_FUNCTIONS]
                 for it, t_type in enumerate(TARGETS):
@@ -332,7 +278,6 @@ def run_culture(args):
                         overlap[ix, ik, it, ir] += len(c_h & c_post) / k
                         if target in c_post:
                             success[ix, ik, it, ir] += 1
-
     rows = []
     for ix, n_manip in enumerate(MANIP_COUNTS):
         for ik, k in enumerate(COMMITTEE_SIZES):
@@ -348,8 +293,6 @@ def run_culture(args):
                         'Avg_Overlap': overlap[ix, ik, it, ir] / trials,
                     })
     return rows, f"{cult_name:36s} {time.time()-t0:6.1f}s  ({trials} trials)"
-
-
 # ======================================================================================
 # 5. SANITY CHECKS
 # ======================================================================================
@@ -375,18 +318,13 @@ def sanity_check_profiles(sample=20000):
     print("    [OK] All six models produce integers in {0,...,5} and use every grade."
           if all_ok else "    [FAIL] grade coverage incomplete.")
     return all_ok
-
-
 def sanity_check_median():
     probe = np.array([[1, 4, 2, 5, 3], [2, 3, 4, 1, 0]])
     med = smart_median(probe, axis=0)
     assert np.array_equal(med, [1, 3, 2, 1, 0]), med
     print(f"[*] Sanity check: lower median (even n) = {med.tolist()}  [OK]")
-
-
 def sanity_check_shapley():
     """The vectorised Shapley must reproduce the original loop up to round-off.
-
     Rankings can legitimately differ only when two candidates tie exactly at the k-th
     boundary (the argsort order is then arbitrary), so ranking equality is asserted only
     when the boundary margin is above the numerical tolerance.
@@ -417,17 +355,107 @@ def sanity_check_shapley():
     print(f"[*] Sanity check: vectorised Shapley == reference loop "
           f"(max |diff| = {worst_phi:.2e}); {checked} non-tied top-k sets matched, "
           f"{ties} exact ties; efficiency |sum(phi) - v(C)| = {abs(phi.sum()-grand):.2e}  [OK]")
-
-
 def sanity_check_design():
     print(f"[*] Design: n = {N_VOTERS} voters fixed; manipulators {MANIP_COUNTS[0]}% ... "
           f"{MANIP_COUNTS[-1]}% ({MANIP_COUNTS[0]} ... {MANIP_COUNTS[-1]} voters); "
           f"honest {N_VOTERS-MANIP_COUNTS[-1]} ... {N_VOTERS-MANIP_COUNTS[0]}")
     print(f"[*] m = {M} candidates, k = {COMMITTEE_SIZES}, attacks = {TARGETS}")
-
-
 # ======================================================================================
-# 6. FIGURE STYLE
+# 6. AUDIT -- verifies that every combination ran and that every result is valid
+# ======================================================================================
+def audit_results(df, base_dir):
+    """Check the whole design and every output cell; write an audit report next to the data.
+    Returns True when every check passes.
+    """
+    print("\n" + "=" * 80)
+    print("[*] AUDIT: checking the design, the coverage and every result cell")
+    report, ok = [], True
+    def check(label, passed, detail=""):
+        nonlocal ok
+        ok &= bool(passed)
+        line = f"  [{'PASS' if passed else 'FAIL'}] {label}" + (f"  ->  {detail}" if detail else "")
+        print(line)
+        report.append(line)
+    # ---- design / coverage ----------------------------------------------------------
+    n_expected = (len(BEST_MODELS) * len(MANIP_COUNTS) * len(COMMITTEE_SIZES)
+                  * len(TARGETS) * len(RULES))
+    check("result rows complete", len(df) == n_expected, f"{len(df)} of {n_expected}")
+    check("all six preference cultures", set(df.Culture) == set(BEST_MODELS),
+          f"{df.Culture.nunique()} cultures")
+    check("all committee sizes k = 2, 3, 4", sorted(df.k.unique()) == COMMITTEE_SIZES,
+          f"k = {sorted(int(v) for v in df.k.unique())}")
+    check("every integer intensity 1% ... 49%",
+          sorted(df.manip_pct.unique()) == MANIP_COUNTS, f"{df.manip_pct.nunique()} levels")
+    check("both attacks present", set(df.Target) == set(TARGETS), f"{sorted(set(df.Target))}")
+    check("all three rules present", set(df.Rule) == set(RULES), f"{len(set(df.Rule))} rules")
+    check("no duplicate cells",
+          df.duplicated(subset=["Culture", "k", "manip_pct", "Target", "Rule"]).sum() == 0)
+    check("electorate is always 100 voters",
+          bool((df.n_honest + df.n_manip == N_VOTERS).all()),
+          f"min {int(df.n_honest.min())} honest, max {int(df.n_manip.max())} manipulators")
+    check("honest count inside 51 ... 99", bool(df.n_honest.between(51, 99).all()))
+    # ---- value validity -------------------------------------------------------------
+    check("no missing values", bool(~df.isna().any().any()))
+    rates = df[["Change_Rate", "Success_Rate"]]
+    check("all rates inside [0, 100]",
+          bool(((rates >= 0) & (rates <= 100)).all().all()),
+          f"max rate {rates.max().max():.1f}%")
+    check("overlap inside [0, 1]", bool(df.Avg_Overlap.between(0, 1).all()),
+          f"range {df.Avg_Overlap.min():.3f} ... {df.Avg_Overlap.max():.3f}")
+    # ---- behavioural identities -----------------------------------------------------
+    gap = df.Change_Rate - df.Success_Rate
+    check("evaluative voting: change rate == success rate (both attacks)",
+          float(gap[df.Rule == 'Evaluative Voting'].abs().max()) < 1e-9,
+          f"max |diff| = {float(gap[df.Rule == 'Evaluative Voting'].abs().max()):.2e} pp")
+    cut = gap[(df.Rule == 'k-Median Rule') & (df.Target == 'Cutoff')]
+    check("cutoff attack: change rate == success rate for the k-Median rule",
+          float(cut.abs().max()) < 1e-9, f"max |diff| = {float(cut.abs().max()):.2e} pp")
+    cut_shap = float(gap[(df.Rule == 'k-Median-Shapley') & (df.Target == 'Cutoff')].max())
+    bot_med = float(gap[(df.Rule == 'k-Median Rule') & (df.Target == 'Bottom')].max())
+    bot_shap = float(gap[(df.Rule == 'k-Median-Shapley') & (df.Target == 'Bottom')].max())
+    for msg in [f"  [INFO] cutoff attack, Shapley: change minus success up to "
+                f"{cut_shap:.1f} pp (expected: Shapley can reshuffle the committee without "
+                f"admitting the target)",
+                f"  [INFO] bottom attack, k-Median: change minus success up to {bot_med:.1f} pp",
+                f"  [INFO] bottom attack, Shapley: change minus success up to {bot_shap:.1f} pp"]:
+        print(msg)
+        report.append(msg)
+    # ---- robustness ordering --------------------------------------------------------
+    for target in TARGETS:
+        for metric in ["Success_Rate", "Change_Rate"]:
+            w = (df[df.Target == target]
+                 .pivot_table(index=["Culture", "k", "manip_pct"], columns="Rule",
+                              values=metric))
+            share = float(((w["k-Median-Shapley"] <= w["k-Median Rule"])
+                           & (w["k-Median Rule"] <= w["Evaluative Voting"])).mean()) * 100
+            check(f"{target} / {metric}: Shapley <= Median <= Evaluative",
+                  share >= 75.0, f"{share:.1f}% of the {len(w)} cells")
+    # ---- monotone response to more manipulation -------------------------------------
+    for target in TARGETS:
+        steps = (df[df.Target == target].groupby(["Culture", "k", "Rule"])["Success_Rate"]
+                 .apply(lambda s: s.sort_index().diff().dropna()))
+        rising = float((steps >= 0).mean()) * 100
+        check(f"{target} / success rate non-decreasing as manipulation grows",
+              rising >= 90.0, f"{rising:.1f}% of consecutive steps")
+    # ---- the attack must actually be able to work -----------------------------------
+    tip = df[(df.Target == 'Bottom') & (df.Rule == 'Evaluative Voting')]
+    worst = float(tip.groupby(["Culture", "k"])["Success_Rate"].max().min())
+    check("every culture x k reacts to the attack (success exceeds 50% somewhere)",
+          worst > 50.0, f"worst case maximum success = {worst:.1f}%")
+    header = (f"AUDIT REPORT - Simulation 1 (manipulation intensity 1%-49%)\n"
+              f"n = {N_VOTERS} voters fixed, m = {M} candidates, k = {COMMITTEE_SIZES}, "
+              f"trials per cell = {int(df.trials.iloc[0])}\n"
+              f"rows = {len(df)} (cultures x k x intensities x attacks x rules)\n"
+              + "-" * 78 + "\n")
+    with open(os.path.join(base_dir, "sim1_audit_report.txt"), "w") as fh:
+        fh.write(header + "\n".join(report) + "\n" + "-" * 78 + "\n"
+                 + ("OVERALL: ALL CHECKS PASSED\n" if ok else "OVERALL: SOME CHECKS FAILED\n"))
+    print("  [OK] audit report written to sim1_audit_report.txt")
+    print(f"  OVERALL: {'ALL CHECKS PASSED' if ok else 'SOME CHECKS FAILED'}")
+    print("=" * 80)
+    return ok
+# ======================================================================================
+# 7. FIGURE STYLE
 # ======================================================================================
 plt.rcParams.update({
     "font.family": "DejaVu Sans", "font.size": 11, "axes.labelsize": 11.5,
@@ -437,7 +465,6 @@ plt.rcParams.update({
     "axes.spines.top": False, "axes.spines.right": False,
     "figure.dpi": 110, "savefig.dpi": 300,
 })
-
 RULE_COLORS = {"Evaluative Voting": "#D55E00", "k-Median Rule": "#0072B2",
                "k-Median-Shapley": "#009E73"}
 RULE_MARKERS = {"Evaluative Voting": "o", "k-Median Rule": "s", "k-Median-Shapley": "^"}
@@ -448,7 +475,6 @@ K_MARKERS = {2: "o", 3: "s", 4: "^"}
 K_LABELS = {2: r"$k=2$", 3: r"$k=3$", 4: r"$k=4$"}
 K_COLORS = {2: "#4C72B0", 3: "#DD8452", 4: "#55A868"}
 MARK_AT = [1, 13, 25, 37, 49]
-
 PANEL_ORDER = list(BEST_MODELS.keys())
 PANEL_TITLES = {
     "Mallows (phi=0.7)": "Mallows ($\\varphi = 0.7$)",
@@ -463,16 +489,11 @@ LATEX_CULTURE = {
     "2D Euclidean": "2D Euclidean", "Impartial Anonymous Culture (IAC)": "IAC",
     "Polya Urn (alpha=0.2)": r"P\'olya Urn ($\alpha=0.2$)", "Impartial Culture (IC)": "Impartial Culture",
 }
-
 XLABEL = "Manipulators (% of the 100-voter electorate)"
 ANCHORS = [10, 20, 30, 40, 49]           # intensities used in the LaTeX tables
-
-
 def _design_note(df):
     return (f"n = {int(df['n_total'].iloc[0])} voters, m = 5 candidates, "
             f"k = 2,3,4, {int(df['trials'].iloc[0]):,} trials per cell")
-
-
 def _two_block_legend(fig, k_values, loc=(0.5, 0.005), ncol=None):
     handles = [plt.Line2D([], [], color=RULE_COLORS[r], lw=2.6,
                           marker=RULE_MARKERS[r], markersize=8, label=RULE_LABELS[r])
@@ -482,10 +503,8 @@ def _two_block_legend(fig, k_values, loc=(0.5, 0.005), ncol=None):
                 for k in k_values]
     fig.legend(handles=handles, loc="lower center", ncol=ncol or len(handles),
                frameon=True, bbox_to_anchor=loc)
-
-
 # ======================================================================================
-# 7. FIGURES
+# 8. FIGURES
 # ======================================================================================
 def fig_intensity_grid(df, target, metric, out_png, out_pdf, ylabel, suptitle):
     """2x3 culture grid: one panel per culture, colour = rule, line style/marker = k."""
@@ -514,11 +533,8 @@ def fig_intensity_grid(df, target, metric, out_png, out_pdf, ylabel, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_dual_metric(df, out_png, out_pdf, suptitle):
     """Bottom attack, both metrics: solid = change rate, dashed = success rate.
-
     Mean over k = 2,3,4 with the shaded band spanning the k values, so the two metrics
     and the effect of committee size are visible in the same panel.
     """
@@ -557,8 +573,6 @@ def fig_dual_metric(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_heatmap(df, out_png, out_pdf, suptitle):
     """Attack-success map: rows = culture x k (18), columns = manipulation bins, one panel
     per rule. Colour = bottom-target success rate (%)."""
@@ -600,11 +614,8 @@ def fig_heatmap(df, out_png, out_pdf, suptitle):
     fig.savefig(out_png, bbox_inches="tight"); fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_tipping_points(df, out_png, out_pdf, suptitle, threshold=50.0):
     """How much manipulation is needed before the bottom target succeeds in 50% of trials?
-
     Further right = more robust. A marker on the right edge means the threshold was never
     reached inside the simulated 1-49% range."""
     sub = df[df["Target"] == "Bottom"]
@@ -648,11 +659,8 @@ def fig_tipping_points(df, out_png, out_pdf, suptitle, threshold=50.0):
     fig.tight_layout()
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_crossing_vs_k(df, out_png, out_pdf, suptitle, threshold=50.0):
     """The simplest summary of the whole simulation.
-
     One panel per culture, x = committee size, y = manipulation level at which the bottom
     target reaches a 50% success rate. A higher curve means the electorate must be
     manipulated harder before the attack works, so a higher curve is a more robust rule.
@@ -700,8 +708,6 @@ def fig_crossing_vs_k(df, out_png, out_pdf, suptitle, threshold=50.0):
     fig.tight_layout(rect=(0, 0.06, 1, 0.93))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_aggregate(df, out_png, out_pdf, suptitle):
     """Mean over the six cultures: rows = attack, columns = metric, k as line style."""
     fig, axes = plt.subplots(2, 2, figsize=(13.5, 9.5), sharey=True)
@@ -727,11 +733,8 @@ def fig_aggregate(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_divergence(df, out_png, out_pdf, suptitle):
     """Bottom attack: change rate minus target success rate (percentage points).
-
     Zero means 'every committee change admits the target'; a positive value means the
     committee changed while the target still failed. Exact zero for evaluative voting."""
     fig, axes = plt.subplots(2, 3, figsize=(17.5, 9.6), sharey=True)
@@ -757,8 +760,6 @@ def fig_divergence(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.93))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def fig_advantage(df, out_png, out_pdf, suptitle):
     """Robustness gain of the median rules over evaluative voting, bottom attack:
     success(evaluative) − success(median rule), in percentage points. Bigger = better."""
@@ -792,8 +793,6 @@ def fig_advantage(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.93))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
-
-
 def make_all_figures(df, graphs_dir):
     print(f"\n[*] Rendering figures -> {graphs_dir}")
     design = "Manipulation-intensity sweep of committee selection"
@@ -843,10 +842,8 @@ def make_all_figures(df, graphs_dir):
     fig_crossing_vs_k(df, os.path.join(graphs_dir, "fig12_crossing_vs_committee_size.png"),
                       os.path.join(graphs_dir, "fig12_crossing_vs_committee_size.pdf"),
                       "How much manipulation is needed to elect the bottom candidate?")
-
-
 # ======================================================================================
-# 8. TABLES
+# 9. TABLES
 # ======================================================================================
 def export_tables(df, tables_dir):
     print(f"\n[*] Exporting tables -> {tables_dir}")
@@ -858,7 +855,6 @@ def export_tables(df, tables_dir):
             name = f"sim1_{metric.lower()}_{target.lower()}_by_intensity.csv"
             piv.to_csv(os.path.join(tables_dir, name))
             print(f"    [+] {name}")
-
     # mean over cultures (compact overview)
     for target in TARGETS:
         sub = df[df["Target"] == target]
@@ -868,7 +864,6 @@ def export_tables(df, tables_dir):
             name = f"sim1_mean_over_cultures_{metric.lower()}_{target.lower()}.csv"
             piv.to_csv(os.path.join(tables_dir, name))
             print(f"    [+] {name}")
-
     # tipping points (first intensity with bottom-target success >= 50%)
     rows = []
     for cult in PANEL_ORDER:
@@ -884,15 +879,12 @@ def export_tables(df, tables_dir):
     tip = pd.DataFrame(rows)
     tip.to_csv(os.path.join(tables_dir, "sim1_tipping_points_bottom.csv"), index=False)
     print("    [+] sim1_tipping_points_bottom.csv")
-
     # LaTeX: one table per (metric, target, k), rows = culture x rule, cols = anchors
     for target in TARGETS:
         for metric in ["Success_Rate", "Change_Rate"]:
             for k in COMMITTEE_SIZES:
                 _latex_table(df, metric, target, k, tables_dir)
     _latex_table_tipping(tip, tables_dir)
-
-
 def _latex_table(df, metric, target, k, tables_dir):
     sub = df[(df["Target"] == target) & (df["k"] == k)]
     head = " & ".join(f"{{${a}\\%$}}" for a in ANCHORS)
@@ -925,8 +917,6 @@ def _latex_table(df, metric, target, k, tables_dir):
     with open(os.path.join(tables_dir, name), "w") as fh:
         fh.write("\n".join(lines))
     print(f"    [+] {name}")
-
-
 def _latex_table_tipping(tip, tables_dir):
     lines = [r"\begin{table}[htbp]", r"  \centering",
              r"  \caption{Manipulation level (\% of the electorate) at which the bottom "
@@ -960,15 +950,13 @@ def _latex_table_tipping(tip, tables_dir):
     with open(os.path.join(tables_dir, "sim1_table_tipping_points.tex"), "w") as fh:
         fh.write("\n".join(lines))
     print("    [+] sim1_table_tipping_points.tex")
-
-
 # ======================================================================================
-# 9. PIPELINE
+# 10. PIPELINE
 # ======================================================================================
 def setup_directories(target_windows_path=r"D:\PYTHON\Project - Median"):
-    base_dir = (os.path.join(target_windows_path, "Simulation 1")
+    base_dir = (os.path.join(target_windows_path, OUTPUT_DIRNAME)
                 if platform.system() == "Windows"
-                else os.path.abspath(os.path.join("./output_median_project", "Simulation 1")))
+                else os.path.abspath(os.path.join("./output_median_project", OUTPUT_DIRNAME)))
     graphs_dir, tables_dir = os.path.join(base_dir, "graphs"), os.path.join(base_dir, "tables")
     for d in (base_dir, graphs_dir, tables_dir):
         os.makedirs(d, exist_ok=True)
@@ -978,8 +966,6 @@ def setup_directories(target_windows_path=r"D:\PYTHON\Project - Median"):
     print(f"[*] Tables      : {tables_dir}")
     print("=" * 80)
     return base_dir, graphs_dir, tables_dir
-
-
 def simulate(base_dir):
     tasks, seed = [], 2026
     for cult in BEST_MODELS:
@@ -1001,8 +987,6 @@ def simulate(base_dir):
     df.to_csv(csv, index=False)
     print(f"[+] {len(df)} rows written to {csv}  ({time.time()-t0:.1f}s)")
     return df
-
-
 def main():
     ap = argparse.ArgumentParser(description="Simulation 1: manipulation-intensity sweep "
                                              "(n=100, m=5, k=2,3,4).")
@@ -1014,14 +998,12 @@ def main():
                     help="reuse the existing sim1_raw_results.csv")
     args = ap.parse_args()
     NUM_ITERATIONS = args.trials
-
     print("=" * 80)
     print("SIMULATION 1 (intensity sweep): median-based committee selection")
     sanity_check_design()
     sanity_check_profiles()
     sanity_check_median()
     sanity_check_shapley()
-
     base_dir, graphs_dir, tables_dir = setup_directories(r"D:\PYTHON\Project - Median")
     csv = os.path.join(base_dir, "sim1_raw_results.csv")
     if args.skip_simulation:
@@ -1031,12 +1013,14 @@ def main():
         print(f"[*] Reusing {csv} ({len(df)} rows)")
     else:
         df = simulate(base_dir)
-
+    audit_ok = audit_results(df, base_dir)
     export_tables(df, tables_dir)
     if not args.skip_figures:
         make_all_figures(df, graphs_dir)
     print("\n" + "=" * 80)
-    print("SIMULATION 1 COMPLETED SUCCESSFULLY")
+    print("SIMULATION 1 COMPLETED SUCCESSFULLY"
+          + ("" if audit_ok else " (with audit warnings)"))
+    print(f"All outputs are in: {base_dir}")
     print("=" * 80)
 
 
