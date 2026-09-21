@@ -56,7 +56,7 @@ PROGRESS BARS
     stand-in keeps the run going (it prints plain lines instead of live bars). At the end
     the script prints an OUTPUT MANIFEST with the files it actually wrote to disk.
 
-OUTPUT  ->  D:\PYTHON\Project - Median\Simulation 1-49% -  m = 10\   (or ./output_median_project/Simulation 1-49% -  m = 10)
+OUTPUT  ->  D:\PYTHON\Project - Median\Simulation 1-49% -  m =10\   (or ./output_median_project/Simulation 1-49% -  m =10)
     sim1_raw_results.csv                     full long-format results
     graphs/                                  ALL figures, one folder, PNG (300 dpi) + PDF
     tables/                                  pivot CSVs, tipping points, LaTeX tables
@@ -163,7 +163,7 @@ SHOW_TRIAL_PROGRESS = True  # one progress bar per worker (hidden when output is
 SMOOTH_WINDOW = 5          # centred moving average for the plotted curves (1 = raw data)
 # -----------------------------------------------------------------------------------------
 # Output folder created under the base path:  D:\PYTHON\Project - Median\<OUTPUT_DIRNAME>
-OUTPUT_DIRNAME = "Simulation 1-49% -  m = 10"
+OUTPUT_DIRNAME = "Simulation 1-49% -  m =10"
 M = 10                     # number of candidates
 SCALE_MAX = 5              # integer score scale {0,1,2,3,4,5}
 COMMITTEE_SIZES = [2, 3, 4, 5, 6, 7, 8, 9]  # k = 1 is a single winner, k = m takes all
