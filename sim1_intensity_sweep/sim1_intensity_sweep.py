@@ -96,6 +96,8 @@ EUCLIDEAN_SCALE = "realized-max"               # "sqrt2" for the paper's exact f
 REQUIRED_GRADES = set(range(SCALE_MAX + 1))
 TARGETS = ['Cutoff', 'Bottom']
 RULES = ['Evaluative Voting', 'k-Median Rule', 'k-Median-Shapley']
+
+
 def smart_median(arr, axis=0):
     """Median returning an integer for even-length input when INTEGER_MEDIAN=True."""
     if not INTEGER_MEDIAN:
@@ -106,6 +108,8 @@ def smart_median(arr, axis=0):
         return np.median(arr, axis=axis)
     sorted_arr = np.sort(arr, axis=axis)
     return np.take(sorted_arr, n // 2 - 1, axis=axis).astype(float)
+
+
 # --- Shapley structures (all 2^m subsets), vectorised ----------------------------------
 subsets_by_len = [[] for _ in range(M + 1)]
 for r in range(M + 1):
@@ -139,14 +143,20 @@ for j in range(M):
 # ======================================================================================
 # 2. VOTING RULES
 # ======================================================================================
+
+
 def utilitarian_rule(scores, k):
     total = np.sum(scores, axis=0)
     ranking = np.argsort(-total, kind='mergesort')
     return ranking, set(ranking[:k]), total
+
+
 def median_rule(scores, k):
     med = smart_median(scores, axis=0)
     ranking = np.argsort(-med, kind='mergesort')
     return ranking, set(ranking[:k]), med
+
+
 def shapley_median_rule(scores, k):
     """Vectorised Shapley value of the median-based coalition game.
     phi_j = sum_{S subseteq C\\{j}} w(|S|) [ v(S u {j}) - v(S) ],  v(S) = median of the
@@ -161,6 +171,8 @@ def shapley_median_rule(scores, k):
         phi[j] = weight_arrays[j] @ (delta[idxj_arrays[j]] - delta[idx_arrays[j]])
     ranking = np.argsort(-phi, kind='mergesort')
     return ranking, set(ranking[:k]), phi
+
+
 def shapley_median_rule_reference(scores, k):
     """Original step-by-step implementation, kept only for the equivalence check."""
     subset_sums = scores @ subset_mask.T
@@ -172,10 +184,14 @@ def shapley_median_rule_reference(scores, k):
             phi[j] += w * (delta[idx_T_j] - delta[idx_T])
     ranking = np.argsort(-phi, kind='mergesort')
     return ranking, set(ranking[:k]), phi
+
+
 RULE_FUNCTIONS = [utilitarian_rule, median_rule, shapley_median_rule]
 # ======================================================================================
 # 3. PREFERENCE GENERATIVE MODELS (STRICT INTEGER SCORES)
 # ======================================================================================
+
+
 def _add_integer_noise(profile, probs=None, scale_max=SCALE_MAX):
     """Integer noise in {-1,0,+1}, clipped: makes grade 1 reachable for rank models."""
     if probs is None:
@@ -184,6 +200,8 @@ def _add_integer_noise(profile, probs=None, scale_max=SCALE_MAX):
         return profile.astype(np.int64)
     noise = np.random.choice([-1, 0, 1], size=profile.shape, p=list(probs))
     return np.clip(profile + noise, 0, scale_max).astype(np.int64)
+
+
 def generate_mallows(n, m=M, phi=0.7, scale_max=SCALE_MAX):
     profile = np.zeros((n, m), dtype=np.int64)
     for i in range(n):
@@ -196,6 +214,8 @@ def generate_mallows(n, m=M, phi=0.7, scale_max=SCALE_MAX):
         for rank_pos, cand in enumerate(ranking):
             profile[i, cand] = int(RANK_TO_SCORE[rank_pos])
     return _add_integer_noise(profile, scale_max=scale_max)
+
+
 def generate_plackett_luce(n, m=M, scale_max=SCALE_MAX):
     gamma = np.random.gamma(shape=2.5, scale=1.0, size=m)
     profile = np.zeros((n, m), dtype=np.int64)
@@ -211,6 +231,8 @@ def generate_plackett_luce(n, m=M, scale_max=SCALE_MAX):
         for rank_pos, cand in enumerate(ranking):
             profile[i, cand] = int(PL_RANK_TO_SCORE[rank_pos])
     return _add_integer_noise(profile, scale_max=scale_max)
+
+
 def generate_euclidean(n, m=M, dim=2, scale_max=SCALE_MAX):
     candidates = np.random.uniform(0, 1, size=(m, dim))
     voters = np.random.uniform(0, 1, size=(n, dim))
@@ -218,12 +240,16 @@ def generate_euclidean(n, m=M, dim=2, scale_max=SCALE_MAX):
     d_ref = np.sqrt(dim) if EUCLIDEAN_SCALE == "sqrt2" else d.max()
     raw = scale_max * (1.0 - d / d_ref)
     return np.clip(np.floor(raw + 0.5), 0, scale_max).astype(np.int64)
+
+
 def generate_iac(n, m=M, scale_max=SCALE_MAX):
     profile = np.zeros((n, m), dtype=np.int64)
     for j in range(m):
         probs = np.random.dirichlet(np.ones(scale_max + 1))
         profile[:, j] = np.random.choice(scale_max + 1, size=n, p=probs).astype(np.int64)
     return profile
+
+
 def generate_urn(n, m=M, alpha=0.2, scale_max=SCALE_MAX):
     urn = [np.random.randint(0, scale_max + 1, size=m, dtype=np.int64) for _ in range(8)]
     profile = np.zeros((n, m), dtype=np.int64)
@@ -233,8 +259,12 @@ def generate_urn(n, m=M, alpha=0.2, scale_max=SCALE_MAX):
         if np.random.rand() < alpha:
             urn.append(ballot)
     return profile
+
+
 def generate_ic(n, m=M, scale_max=SCALE_MAX):
     return np.random.randint(0, scale_max + 1, size=(n, m), dtype=np.int64)
+
+
 BEST_MODELS = {
     'Mallows (phi=0.7)': generate_mallows,
     'Plackett-Luce': generate_plackett_luce,
@@ -246,6 +276,8 @@ BEST_MODELS = {
 # ======================================================================================
 # 4. MONTE CARLO WORKER  (one task per culture; every task sweeps x and k internally)
 # ======================================================================================
+
+
 def run_culture(args):
     cult_name, trials, seed = args
     np.random.seed(seed)
@@ -296,6 +328,8 @@ def run_culture(args):
 # ======================================================================================
 # 5. SANITY CHECKS
 # ======================================================================================
+
+
 def sanity_check_profiles(sample=20000):
     print(f"\n[*] Sanity check: integer scores, range [0,{SCALE_MAX}], grade coverage "
           f"({sample} voters per model)...")
@@ -318,11 +352,15 @@ def sanity_check_profiles(sample=20000):
     print("    [OK] All six models produce integers in {0,...,5} and use every grade."
           if all_ok else "    [FAIL] grade coverage incomplete.")
     return all_ok
+
+
 def sanity_check_median():
     probe = np.array([[1, 4, 2, 5, 3], [2, 3, 4, 1, 0]])
     med = smart_median(probe, axis=0)
     assert np.array_equal(med, [1, 3, 2, 1, 0]), med
     print(f"[*] Sanity check: lower median (even n) = {med.tolist()}  [OK]")
+
+
 def sanity_check_shapley():
     """The vectorised Shapley must reproduce the original loop up to round-off.
     Rankings can legitimately differ only when two candidates tie exactly at the k-th
@@ -355,6 +393,8 @@ def sanity_check_shapley():
     print(f"[*] Sanity check: vectorised Shapley == reference loop "
           f"(max |diff| = {worst_phi:.2e}); {checked} non-tied top-k sets matched, "
           f"{ties} exact ties; efficiency |sum(phi) - v(C)| = {abs(phi.sum()-grand):.2e}  [OK]")
+
+
 def sanity_check_design():
     print(f"[*] Design: n = {N_VOTERS} voters fixed; manipulators {MANIP_COUNTS[0]}% ... "
           f"{MANIP_COUNTS[-1]}% ({MANIP_COUNTS[0]} ... {MANIP_COUNTS[-1]} voters); "
@@ -363,6 +403,8 @@ def sanity_check_design():
 # ======================================================================================
 # 6. AUDIT -- verifies that every combination ran and that every result is valid
 # ======================================================================================
+
+
 def audit_results(df, base_dir):
     """Check the whole design and every output cell; write an audit report next to the data.
     Returns True when every check passes.
@@ -454,6 +496,8 @@ def audit_results(df, base_dir):
     print(f"  OVERALL: {'ALL CHECKS PASSED' if ok else 'SOME CHECKS FAILED'}")
     print("=" * 80)
     return ok
+
+
 # ======================================================================================
 # 7. FIGURE STYLE
 # ======================================================================================
@@ -491,9 +535,13 @@ LATEX_CULTURE = {
 }
 XLABEL = "Manipulators (% of the 100-voter electorate)"
 ANCHORS = [10, 20, 30, 40, 49]           # intensities used in the LaTeX tables
+
+
 def _design_note(df):
     return (f"n = {int(df['n_total'].iloc[0])} voters, m = 5 candidates, "
             f"k = 2,3,4, {int(df['trials'].iloc[0]):,} trials per cell")
+
+
 def _two_block_legend(fig, k_values, loc=(0.5, 0.005), ncol=None):
     handles = [plt.Line2D([], [], color=RULE_COLORS[r], lw=2.6,
                           marker=RULE_MARKERS[r], markersize=8, label=RULE_LABELS[r])
@@ -506,6 +554,8 @@ def _two_block_legend(fig, k_values, loc=(0.5, 0.005), ncol=None):
 # ======================================================================================
 # 8. FIGURES
 # ======================================================================================
+
+
 def fig_intensity_grid(df, target, metric, out_png, out_pdf, ylabel, suptitle):
     """2x3 culture grid: one panel per culture, colour = rule, line style/marker = k."""
     fig, axes = plt.subplots(2, 3, figsize=(17.5, 9.6), sharey=True)
@@ -533,6 +583,8 @@ def fig_intensity_grid(df, target, metric, out_png, out_pdf, ylabel, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_dual_metric(df, out_png, out_pdf, suptitle):
     """Bottom attack, both metrics: solid = change rate, dashed = success rate.
     Mean over k = 2,3,4 with the shaded band spanning the k values, so the two metrics
@@ -573,6 +625,8 @@ def fig_dual_metric(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_heatmap(df, out_png, out_pdf, suptitle):
     """Attack-success map: rows = culture x k (18), columns = manipulation bins, one panel
     per rule. Colour = bottom-target success rate (%)."""
@@ -614,6 +668,8 @@ def fig_heatmap(df, out_png, out_pdf, suptitle):
     fig.savefig(out_png, bbox_inches="tight"); fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_tipping_points(df, out_png, out_pdf, suptitle, threshold=50.0):
     """How much manipulation is needed before the bottom target succeeds in 50% of trials?
     Further right = more robust. A marker on the right edge means the threshold was never
@@ -659,6 +715,8 @@ def fig_tipping_points(df, out_png, out_pdf, suptitle, threshold=50.0):
     fig.tight_layout()
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_crossing_vs_k(df, out_png, out_pdf, suptitle, threshold=50.0):
     """The simplest summary of the whole simulation.
     One panel per culture, x = committee size, y = manipulation level at which the bottom
@@ -708,6 +766,8 @@ def fig_crossing_vs_k(df, out_png, out_pdf, suptitle, threshold=50.0):
     fig.tight_layout(rect=(0, 0.06, 1, 0.93))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_aggregate(df, out_png, out_pdf, suptitle):
     """Mean over the six cultures: rows = attack, columns = metric, k as line style."""
     fig, axes = plt.subplots(2, 2, figsize=(13.5, 9.5), sharey=True)
@@ -733,6 +793,8 @@ def fig_aggregate(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_divergence(df, out_png, out_pdf, suptitle):
     """Bottom attack: change rate minus target success rate (percentage points).
     Zero means 'every committee change admits the target'; a positive value means the
@@ -760,6 +822,8 @@ def fig_divergence(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.93))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def fig_advantage(df, out_png, out_pdf, suptitle):
     """Robustness gain of the median rules over evaluative voting, bottom attack:
     success(evaluative) − success(median rule), in percentage points. Bigger = better."""
@@ -793,6 +857,8 @@ def fig_advantage(df, out_png, out_pdf, suptitle):
     fig.tight_layout(rect=(0, 0.05, 1, 0.93))
     fig.savefig(out_png); fig.savefig(out_pdf); plt.close(fig)
     print(f"    [+] {os.path.basename(out_png)}")
+
+
 def make_all_figures(df, graphs_dir):
     print(f"\n[*] Rendering figures -> {graphs_dir}")
     design = "Manipulation-intensity sweep of committee selection"
@@ -845,6 +911,8 @@ def make_all_figures(df, graphs_dir):
 # ======================================================================================
 # 9. TABLES
 # ======================================================================================
+
+
 def export_tables(df, tables_dir):
     print(f"\n[*] Exporting tables -> {tables_dir}")
     for target in TARGETS:
@@ -885,6 +953,8 @@ def export_tables(df, tables_dir):
             for k in COMMITTEE_SIZES:
                 _latex_table(df, metric, target, k, tables_dir)
     _latex_table_tipping(tip, tables_dir)
+
+
 def _latex_table(df, metric, target, k, tables_dir):
     sub = df[(df["Target"] == target) & (df["k"] == k)]
     head = " & ".join(f"{{${a}\\%$}}" for a in ANCHORS)
@@ -917,6 +987,8 @@ def _latex_table(df, metric, target, k, tables_dir):
     with open(os.path.join(tables_dir, name), "w") as fh:
         fh.write("\n".join(lines))
     print(f"    [+] {name}")
+
+
 def _latex_table_tipping(tip, tables_dir):
     lines = [r"\begin{table}[htbp]", r"  \centering",
              r"  \caption{Manipulation level (\% of the electorate) at which the bottom "
@@ -953,6 +1025,8 @@ def _latex_table_tipping(tip, tables_dir):
 # ======================================================================================
 # 10. PIPELINE
 # ======================================================================================
+
+
 def setup_directories(target_windows_path=r"D:\PYTHON\Project - Median"):
     base_dir = (os.path.join(target_windows_path, OUTPUT_DIRNAME)
                 if platform.system() == "Windows"
@@ -966,6 +1040,8 @@ def setup_directories(target_windows_path=r"D:\PYTHON\Project - Median"):
     print(f"[*] Tables      : {tables_dir}")
     print("=" * 80)
     return base_dir, graphs_dir, tables_dir
+
+
 def simulate(base_dir):
     tasks, seed = [], 2026
     for cult in BEST_MODELS:
@@ -987,6 +1063,8 @@ def simulate(base_dir):
     df.to_csv(csv, index=False)
     print(f"[+] {len(df)} rows written to {csv}  ({time.time()-t0:.1f}s)")
     return df
+
+
 def main():
     ap = argparse.ArgumentParser(description="Simulation 1: manipulation-intensity sweep "
                                              "(n=100, m=5, k=2,3,4).")
