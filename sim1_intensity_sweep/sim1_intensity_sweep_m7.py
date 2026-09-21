@@ -42,7 +42,9 @@ PROGRESS BARS
     Trial-level progress bars (one per worker, pinned to its own terminal line), plus
     bars for the culture, table and figure stages. They hide themselves automatically
     when the output is redirected to a file; set SHOW_TRIAL_PROGRESS = False to switch
-    the trial bars off entirely.
+    the trial bars off entirely. tqdm is optional: if it is missing, a small built-in
+    stand-in keeps the run going (it prints plain lines instead of live bars). At the end
+    the script prints an OUTPUT MANIFEST with the files it actually wrote to disk.
 
 OUTPUT  ->  D:\PYTHON\Project - Median\Simulation 1-49% -  m =7\   (or ./output_median_project/Simulation 1-49% -  m =7)
     sim1_raw_results.csv                     full long-format results
@@ -61,7 +63,9 @@ import itertools
 import math
 import os
 import platform
+import sys
 import time
+import traceback
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -72,13 +76,59 @@ from multiprocessing import Pool, cpu_count, current_process
 try:
     from tqdm import tqdm
 except ImportError:
-    def tqdm(iterable, total=None, desc="Processing", unit="task", **kwargs):
-        total = total or len(iterable)
-        for i, item in enumerate(iterable):
-            yield item
-            pct = ((i + 1) / total) * 100
-            print(f"\r{desc}: [{i+1}/{total}] ({pct:.1f}%)", end="", flush=True)
-        print()
+    class tqdm:
+        """Minimal stand-in used when tqdm is not installed.
+
+        It supports every part of the tqdm API this script uses: iteration, the context
+        manager protocol (with ... as bar), update, close, set_postfix_str and
+        tqdm.write. It stays silent when the output is not a terminal; on a terminal it
+        prints one plain progress line per step.
+        """
+
+        def __init__(self, iterable=None, total=None, desc="Processing", unit="task",
+                     disable=None, **kwargs):
+            self.iterable = iterable
+            self.total = total if total is not None else len(iterable)
+            self.desc = desc
+            self.unit = unit
+            self.n = 0
+            self.postfix = ""
+            self.disabled = bool(disable) or not sys.stderr.isatty()
+            self._it = iter(iterable) if iterable is not None else None
+
+        def __iter__(self):
+            for item in self._it:
+                yield item
+                self.update(1)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            self.close()
+            return False
+
+        def update(self, n=1):
+            self.n += n
+            if self.disabled or not self.total:
+                return
+            # whole lines at ~10% steps: no cursor control is available without tqdm
+            step = max(1, self.total // 10)
+            if self.n % step == 0 or self.n >= self.total:
+                pct = self.n / self.total * 100
+                postfix = f"  [{self.postfix}]" if self.postfix else ""
+                print(f"{self.desc}: {self.n}/{self.total} ({pct:.1f}%){postfix}",
+                      file=sys.stderr, flush=True)
+
+        def set_postfix_str(self, postfix, refresh=True):
+            self.postfix = postfix
+
+        def close(self):
+            pass
+
+        @staticmethod
+        def write(msg):
+            print(msg)
 
 
 def tqdm_write(msg):
@@ -1195,6 +1245,29 @@ def simulate(base_dir):
     return df
 
 
+def verify_outputs(base_dir, graphs_dir, tables_dir, expect_figures=True):
+    """List what actually landed on disk, so a silent write failure cannot hide."""
+    print("\n[*] OUTPUT MANIFEST (checked on disk)")
+
+    def listing(folder, suffixes):
+        if not os.path.isdir(folder):
+            return []
+        return sorted(f for f in os.listdir(folder)
+                      if f.lower().endswith(tuple(suffixes)))
+
+    csv = os.path.join(base_dir, "sim1_raw_results.csv")
+    rep = os.path.join(base_dir, "sim1_audit_report.txt")
+    figs = listing(graphs_dir, (".png", ".pdf"))
+    tabs = listing(tables_dir, (".csv", ".tex"))
+
+    print(f"    {'[OK]     ' if os.path.isfile(csv) else '[MISSING]'} {os.path.abspath(csv)}")
+    print(f"    {'[OK]     ' if os.path.isfile(rep) else '[MISSING]'} {os.path.abspath(rep)}")
+    print(f"    {'[OK]     ' if figs else ('[SKIP]   ' if not expect_figures else '[MISSING]')} "
+          f"{os.path.abspath(graphs_dir)}  ({len(figs)} figure files)")
+    print(f"    {'[OK]     ' if tabs else '[MISSING]'} {os.path.abspath(tables_dir)}  "
+          f"({len(tabs)} table files)")
+
+
 def main():
     ap = argparse.ArgumentParser(
         description=f"Simulation 1: manipulation-intensity sweep (n={N_VOTERS}, m={M}, "
@@ -1223,15 +1296,30 @@ def main():
     else:
         df = simulate(base_dir)
     audit_ok = audit_results(df, base_dir)
+    for d in (base_dir, graphs_dir, tables_dir):   # never write into a missing folder
+        os.makedirs(d, exist_ok=True)
     export_tables(df, tables_dir)
     if not args.skip_figures:
         make_all_figures(df, graphs_dir)
+
+    verify_outputs(base_dir, graphs_dir, tables_dir, expect_figures=not args.skip_figures)
+
     print("\n" + "=" * 80)
     print("SIMULATION 1 COMPLETED SUCCESSFULLY"
           + ("" if audit_ok else " (with audit warnings)"))
-    print(f"All outputs are in: {base_dir}")
+    print(f"All outputs are in: {os.path.abspath(base_dir)}")
     print("=" * 80)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        traceback.print_exc()
+        print("\n[!] The run stopped with the error above; no further files were written.")
+        if platform.system() == "Windows":
+            try:
+                input("Press Enter to close this window...")
+            except EOFError:
+                pass
+        sys.exit(1)
