@@ -707,7 +707,7 @@ def fig_intensity_grid(df, target, metric, out_png, out_pdf, ylabel, suptitle):
 
 def fig_dual_metric(df, out_png, out_pdf, suptitle):
     """Bottom attack, both metrics: solid = change rate, dashed = success rate.
-    Mean over k = 2,3,4 with the shaded band spanning the k values, so the two metrics
+    Mean over the committee sizes with the shaded band spanning the k values, so the metrics
     and the effect of committee size are visible in the same panel.
     """
     fig, axes = plt.subplots(2, 3, figsize=(17.5, 9.6), sharey=True)
