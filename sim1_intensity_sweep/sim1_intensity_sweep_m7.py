@@ -101,7 +101,7 @@ MANIP_PCT_MAX = 49         # 49% of the electorate -> 49 manipulators
 NUM_ITERATIONS = 1000      # Monte Carlo trials per culture (each trial covers all x, k)
 SHOW_TRIAL_PROGRESS = True  # one progress bar per worker (hidden when output is piped)
 # -----------------------------------------------------------------------------------------
-# Output folder created under the base path:  D:\PYTHON\Project - Median\Simulation 1-49%
+# Output folder created under the base path:  D:\PYTHON\Project - Median\<OUTPUT_DIRNAME>
 OUTPUT_DIRNAME = "Simulation 1-49% -  m =7"
 M = 7                      # number of candidates
 SCALE_MAX = 5              # integer score scale {0,1,2,3,4,5}
