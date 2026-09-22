@@ -1,0 +1,862 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------------------------------------------------------------------------
+% Packages
+% ---------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% ---------------------------------------------------------------------------
+% Global settings
+% ---------------------------------------------------------------------------
+% The twelve figure PDFs (fig01_..._fig12_...) must sit in a graphs/ folder next to
+% this file (or compile from the folder that contains them, e.g. the simulation
+% output folder).  Nothing else is needed beyond a standard TeX Live install.
+\graphicspath{{graphs/}{./graphs/}{figures/}{./figures/}}
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\sisetup{detect-all}
+\setlist{nosep,leftmargin=1.4em}
+
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+\titlespacing*{\section}{0pt}{1.5em}{0.8em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.6em}
+
+% ---------------------------------------------------------------------------
+% One consistent figure macro.
+%   * Every figure sits alone on its own page (float [p]).
+%   * Every figure is scaled to the SAME bounding box:
+%         width  = \linewidth
+%         height <= 0.78\textheight
+%     so nothing ever overflows the page.
+% ---------------------------------------------------------------------------
+\newcommand{\reportfig}[3]{%
+  \clearpage
+  \begin{figure}[p]
+    \centering
+    \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{#1}
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+  \clearpage
+}
+
+\title{\bfseries Simulation 1: Median-Based Committee Selection under Manipulation\\[0.4em]
+\large A Detailed, Plain-Language Figure Report (corrected edition)}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report explains, in simple language, the twelve figures produced by
+Simulation~1. The simulation asks a straightforward question: \emph{if some
+voters lie about their preferences, can they push a candidate they like into
+the winning committee?} To answer it, we compare three ways of choosing a
+committee --- Evaluative Voting, the \(k\)-Median Rule, and the
+\(k\)-Median-Shapley Rule --- against two kinds of attacks (the Cutoff attack
+and the Bottom attack), under six different models of what voters' honest
+opinions look like, and for eight committee sizes (\(k = 2, \dots, 9\)). The
+electorate is always \(100\) voters, there are \(m = 10\) candidates, and
+every combination is repeated many times to get stable numbers. Every figure
+below is explained from scratch: what is on each axis, what each colour and
+line means, what the shape of the curve tells us, and what the overall
+conclusion is.
+
+\medskip
+\noindent\textbf{Note on the figure set.} The figures in this report are the
+\(m = 10\) build, with committee sizes \(k = 2, \dots, 9\) and centred
+\(5\)-point smoothing on the drawn curves. If an older \(m = 5\) figure set
+(\(k = 2,3,4\), no smoothing) is used, several numbers below --- especially
+the median-rule tipping points and the IC ordering --- will differ. Always
+match the report to the figure set that was actually rendered.
+
+\medskip
+\noindent\textbf{Where the numbers come from.} Figures and cell-level
+statistics are quoted from the \(m = 5\) and \(m = 7\) runs at \(1{,}000\)
+trials per cell, and from the audited \(m = 10\) verification run at \(200\)
+trials per cell (the run whose audit reports \textsc{all checks passed}).
+Individual \(m = 10\) curve values move by a point or two between runs, but
+the ranges, the orderings and the qualitative statements below are stable.
+
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+% ===========================================================================
+\section{What Is This Simulation About?}
+% ===========================================================================
+
+Imagine a small election. There are \(100\) voters and \(10\) candidates.
+Every voter honestly scores every candidate from \(0\) to \(5\). We then pick a committee of size
+\(k\) (for example, \(k = 5\)) using some rule. That is the \emph{honest
+committee}.
+
+Now suppose a group of voters decides to lie. They all agree to give the
+highest possible score to one specific candidate --- their \emph{target} ---
+and the lowest possible score to everybody else. They hope this pushes the
+target into the committee.
+
+The simulation asks:
+\begin{itemize}
+  \item How many liars does it take before the committee changes?
+  \item How many liars does it take before the target actually gets in?
+  \item Does the answer depend on which voting rule we use?
+  \item Does the answer depend on what the honest voters' opinions look like?
+  \item Does the answer depend on how big the committee is?
+\end{itemize}
+
+The twelve figures are different ways of looking at those answers.
+
+% ===========================================================================
+\section{The Building Blocks}
+% ===========================================================================
+
+% ---------------------------------------------------------------------------
+\subsection{The Six Preference Models}
+% ---------------------------------------------------------------------------
+
+A ``preference model'' is just a recipe for generating honest voter opinions.
+We use six of them, because real electorates can look very different.
+
+\begin{table}[H]
+  \centering
+  \caption{The six ways we generate honest voter opinions.}
+  \label{tab:cultures}
+  \begin{tabular}{@{}p{4.2cm}p{10.5cm}@{}}
+    \toprule
+    Model & In plain words \\
+    \midrule
+    Mallows (\(\varphi = 0.7\)) &
+    Voters mostly agree on a single ``correct'' ranking, but each voter makes
+    a few random swaps. Dispersion is controlled. \\
+    Plackett--Luce &
+    Voters pick candidates one at a time from a weighted lottery. Popular
+    candidates are more likely to be picked first. \\
+    2D Euclidean &
+    Each voter and each candidate is a dot on a square map. Voters like
+    candidates who are close to them. \\
+    IAC (Impartial Anonymous Culture) &
+    For each candidate independently, the whole electorate draws a random
+    distribution of scores. There is no shared structure. \\
+    P\'olya Urn (\(\alpha = 0.2\)) &
+    Voters copy each other. Each new vote is more likely to look like votes
+    already cast. This creates clusters of similar opinions. \\
+    Impartial Culture (IC) &
+    Every voter gives every candidate a completely random score from
+    \(\{0,1,2,3,4,5\}\). The most disordered model possible. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------------
+\subsection{The Three Voting Rules}
+% ---------------------------------------------------------------------------
+
+A ``rule'' is a recipe for turning all the voters' scores into a committee.
+
+\begin{itemize}
+  \item \textbf{Evaluative Voting.}
+        Add up every candidate's scores across all voters. Pick the \(k\)
+        candidates with the biggest totals. This is like a popular vote ---
+        the more total points you get, the better.
+  \item \textbf{\(k\)-Median Rule.}
+        For each candidate, find the median score (the middle score when all
+        voters are lined up from lowest to highest). Pick the \(k\) candidates
+        with the highest medians. This cares about the typical voter, not the
+        total, so a handful of extremists cannot move it very much.
+  \item \textbf{\(k\)-Median-Shapley Rule.}
+        Use the median, but instead of scoring a candidate by their own
+        median alone, score them by their \emph{average marginal
+        contribution}: take every possible group (coalition) of candidates
+        the candidate could join, look at the median of the group's combined
+        score with and without them, and average the difference over all
+        such groups. This is the Shapley value of the median-based game. It
+        rewards candidates who lift up the whole committee, not just
+        themselves.
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+\subsection{The Two Attacks}
+% ---------------------------------------------------------------------------
+
+The liars always use the same ballot: score~\(5\) for their target, \(0\) for
+everyone else. What changes is \emph{which} candidate they target.
+
+\begin{itemize}
+  \item \textbf{Cutoff attack.} The target is the candidate ranked \(k+1\)
+        by the honest electorate --- the first candidate who just missed the
+        committee. This is the ``easiest'' candidate to push in, because they
+        are already close to the boundary.
+  \item \textbf{Bottom attack.} The target is the candidate ranked last
+        (rank~\(m\)). This is the hardest candidate to push in, because they
+        start from the very bottom.
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+\subsection{The Three Metrics}
+% ---------------------------------------------------------------------------
+
+For each trial we record three numbers.
+
+\begin{itemize}
+  \item \textbf{Change rate (\%)} --- did the committee change at all?
+        \(100\%\) means it changed in every trial; \(0\%\) means it never
+        changed.
+  \item \textbf{Success rate (\%)} --- did the target actually enter the
+        committee? This is what the liars really care about.
+  \item \textbf{Average overlap} --- what fraction of the honest committee
+        survived? \(1.0\) means nothing changed; \(0.0\) means the whole
+        committee was replaced.
+\end{itemize}
+
+% ===========================================================================
+\section{How to Read Every Figure}
+% ===========================================================================
+
+Before we look at each figure, here is a small cheat-sheet.
+
+\begin{itemize}
+  \item \textbf{Horizontal axis (\(x\))} is always ``manipulators as a
+        percentage of the \(100\)-voter electorate''. It goes from \(1\%\) to
+        \(49\%\). So moving right means more liars.
+  \item \textbf{Vertical axis (\(y\))} is always a percentage rate
+        (\(0\)--\(100\%\)) or an overlap (\(0\)--\(1\)). Higher means the
+        attack is doing more damage.
+  \item \textbf{Colour} tells you the rule:
+        \textcolor[HTML]{D55E00}{orange} \(=\) Evaluative Voting,
+        \textcolor[HTML]{0072B2}{blue} \(=\) \(k\)-Median,
+        \textcolor[HTML]{009E73}{green} \(=\) \(k\)-Median-Shapley.
+  \item \textbf{Line style and marker} tell you the committee size~\(k\).
+        All eight sizes are drawn with the \emph{same} line width
+        (\(1.7\)\,pt); only the dash pattern and the marker change.
+        \(k=2\) is the finest dotted line with circle markers, \(k=3\) the
+        dashed line with squares, \(k=4\) the solid line with triangles, and
+        so on up to \(k=9\) (dash--dot--dot, plus markers). The legend at the
+        bottom of each figure shows the exact mapping.
+  \item \textbf{Panel layout.} Figures~1--6, 10, 11, 12 are \(2 \times 3\)
+        grids (six preference models). Figure~7 is a heatmap (one panel per
+        rule). Figure~8 is a single tall panel with the legend at lower right.
+        Figure~9 is a \(2 \times 2\) grid (rows = attacks, columns = metrics).
+  \item \textbf{About the ``larger \(k\) is more manipulable'' shorthand.}
+        This is true for the \emph{bottom} attack but \emph{not} for the
+        \emph{cutoff} attack. Under the cutoff attack small committees are the
+        more exposed ones. Wherever this report says ``larger \(k\)'' or
+        ``smaller \(k\)'' about manipulability, it will say which attack it
+        means. See Section~\ref{sec:contradiction}.
+\end{itemize}
+
+% ===========================================================================
+\section{Figure-by-Figure Walkthrough}
+% ===========================================================================
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 1 --- Cutoff Attack: How Often Does the Committee Change?}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig01_cutoff_change_rate.pdf}%
+{Cutoff attack: committee change rate across the six preference models.
+Each panel shows one culture. Colour \(=\) rule, line style and marker \(=\)
+committee size \(k\). The \(y\)-axis is the percentage of trials in which the
+winning committee differs from the honest committee. Curves are drawn with a
+centred \(5\)-point moving average (display only).}{fig:cutoff_change}
+
+\textbf{What is plotted.} For each preference model (one panel), for each rule
+(colour), for each committee size (line style), the figure shows the percentage
+of trials in which the committee changed, as we increase the number of liars
+from \(1\%\) to \(49\%\).
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Orange lines shoot up almost immediately.} Under Evaluative
+        Voting, even a handful of liars is enough to change the committee.
+        The reason is simple: adding up scores is very sensitive to extreme
+        ballots.
+  \item \textbf{Blue lines rise more slowly.} The \(k\)-Median Rule looks at
+        the middle voter, not the sum. A single extreme ballot does not move
+        the median much.
+  \item \textbf{Green lines are the slowest.} The Shapley rule spreads the
+        influence of any one candidate across many possible coalitions.
+  \item \textbf{Under the cutoff attack, \emph{small} \(k\) is the more
+        exposed one --- clearly so for evaluative voting, where the \(k=2\)
+        curve is never below the \(k=9\) curve in any dataset (\(m=5\), \(7\)
+        and \(10\)); at \(m=10\) it is strictly above it at \(61\%\) of
+        intensities when the cultures are averaged (the other \(39\%\) are
+        ties, mostly where both curves have saturated). For the median rules
+        the ordering across \(k\) is much weaker and partly non-monotone: at
+        \(m=10\) the \(k\)-Median \(k=9\) curve is above the \(k=2\) curve at
+        \(53\%\) of intensities and below it at \(37\%\). This is the
+        \emph{opposite} of what happens under the bottom attack (see
+        Figure~\ref{fig:bottom_change} and
+        Section~\ref{sec:contradiction}).}
+  \item \textbf{Impartial Culture is the most fragile.} In a completely random
+        electorate, no rule can hold its ground for long.
+  \item \textbf{Mallows and Plackett--Luce are the most stable.} When voters
+        mostly agree, the honest signal is strong and liars have less
+        influence. Averaged over the first \(15\%\) of manipulators at
+        \(m = 5\), the evaluative change rate runs \(90.5\%\) under Impartial
+        Culture but only \(53.5\%\) under Mallows and \(48.9\%\) under
+        Plackett--Luce.
+\end{itemize}
+
+\textbf{Take-away.} If the question is ``how easily can a small group change
+the committee?'', the answer is: \emph{very easily under evaluative voting,
+much harder under median rules, and hardest under Shapley.}
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 2 --- Cutoff Attack: How Often Does the Target Get In?}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig02_cutoff_success_rate.pdf}%
+{Cutoff attack: target success rate. Same layout as
+Figure~\ref{fig:cutoff_change}, but the \(y\)-axis now records the percentage
+of trials in which the targeted cutoff candidate actually enters the
+committee.}{fig:cutoff_success}
+
+\textbf{What is plotted.} The same setup as Figure~\ref{fig:cutoff_change}, but
+now we do not ask ``did anything change?''. We ask ``did the \emph{target}
+get in?''.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{For evaluative voting, Figures~1 and~2 are identical.}
+        Under evaluative voting, the only way the committee changes is if the
+        target swaps in, so change rate equals success rate exactly.
+  \item \textbf{For the \(k\)-Median rule, change and success are also
+        identical under the cutoff attack.} The reason is structural: under
+        the cutoff attack, the target is the single candidate the honest
+        committee excludes, so ``the committee changed'' and ``the target got
+        in'' describe the same event. Across the full \(m = 10\) bottom-vs-cutoff
+        audit, this equivalence holds in \(100\%\) of cells.
+  \item \textbf{For \(k\)-Median-Shapley, a small gap appears.} The Shapley
+        rule can reshuffle the committee without admitting the target --- up
+        to roughly \(35\) percentage points in the worst single cell of the
+        \(m = 10\) dataset (mean gap \(4.7\)~pp).
+\end{itemize}
+
+\textbf{Take-away.} Under the cutoff attack, ``change'' and ``success'' are
+almost the same question for the two non-Shapley rules; the Shapley rule is
+the only one where churn is not a perfect proxy for admitting the target.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 3 --- Bottom Attack: How Often Does the Committee Change?}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig03_bottom_change_rate.pdf}%
+{Bottom attack: committee change rate. The target is now the worst-ranked
+candidate. Layout and encoding follow Figures~\ref{fig:cutoff_change}
+and~\ref{fig:cutoff_success}.}{fig:bottom_change}
+
+\textbf{What is plotted.} Exactly Figure~\ref{fig:cutoff_change}, but now the
+liars try to push in the \emph{worst-ranked} candidate instead of the first
+runner-up.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{All curves shift right relative to the cutoff attack.}
+        Pushing the worst candidate in is harder, so it takes more liars.
+  \item \textbf{Under the bottom attack, \emph{large} \(k\) is the more
+        exposed one.} Averaged over cultures at \(m = 10\), the \(k = 9\)
+        curve lies above the \(k = 2\) curve at \(86\%\) of intensities under
+        evaluative voting, \(94\%\) under \(k\)-Median and \(88\%\) under
+        Shapley. The pattern weakens in the most disordered models --- in
+        Impartial Culture the same share falls to \(29\%\), \(18\%\) and
+        \(80\%\) respectively, because there both curves saturate early. This
+        is the reverse of the cutoff attack and is the source of the apparent
+        contradiction in earlier drafts
+        (Section~\ref{sec:contradiction}).
+  \item \textbf{The curves are monotone.} In the \(1{,}000\)-trial runs the
+        drawn curves rise smoothly (at \(m=5\), \(99\%\) of consecutive steps
+        are non-decreasing for \(k\)-Median, \(96\%\) for Shapley, with a
+        largest single dip of \(3\)~pp). In a \(200\)-trial pilot the same
+        curves show \(\pm3\)--\(7\)~pp wobbles; those are Monte Carlo noise,
+        not structure.
+  \item \textbf{The Shapley rule is still the most robust.} Its change rate
+        stays below \(k\)-Median's in \(91\%\) of cells and below evaluative
+        voting's in \(76\%\) of cells in the \(m = 10\) data --- the ordering
+        holds, but it is a tendency rather than an absolute law.
+\end{itemize}
+
+\textbf{Take-away.} The bottom attack is harder than the cutoff attack, and
+in this regime bigger committees are easier to flip.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 4 --- Bottom Attack: How Often Does the Target Get In?}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig04_bottom_success_rate.pdf}%
+{Bottom attack: target success rate. The \(y\)-axis records the percentage of
+trials in which the bottom-ranked candidate enters the committee.}{fig:bottom_success}
+
+\textbf{What is plotted.} The most important figure for the paper's main
+claim.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Orange curves (evaluative voting)} rise fast and reach
+        \(100\%\) success well before \(49\%\) liars --- earliest in the most
+        disordered electorate (Impartial Culture, at \(15\%\) liars) and
+        latest in the best-structured ones (Mallows at \(37\%\),
+        Plackett--Luce at \(43\%\)). Note the direction: the disordered models
+        fall first, not last.
+  \item \textbf{Blue curves (\(k\)-Median)} rise more slowly. In the \(m=10\)
+        run, their \(50\%\) tipping points span roughly \(5\%\)
+        (Impartial Culture, \(k=9\)) to \(42\%\) (Mallows, \(k=2\)).
+  \item \textbf{Green curves (\(k\)-Median-Shapley)} are the lowest of all. In
+        the \(m = 10\) build, six of the \(48\) (culture, \(k\)) cells never
+        reach \(50\%\) success inside the simulated range, and all six are at
+        \(k = 2\) or \(k = 3\). Larger committees eventually let the target
+        through.
+  \item \textbf{Culture changes the height, not the order --- with one
+        caveat.} The \(k\)-Median rule beats evaluative voting in \(90.5\%\)
+        of the bottom-attack cells. All \(9.5\%\) of exceptions sit at low
+        manipulation (\(80\) cells at \(1\)--\(5\%\) liars, \(131\) at
+        \(6\)--\(15\%\), \(12\) at \(16\)--\(30\%\), none beyond \(30\%\)),
+        and never by more than \(9\)~pp.
+\end{itemize}
+
+\textbf{Take-away.} This is the headline result: \emph{median-based rules are
+substantially harder for liars to exploit, especially for small committees.}
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 5 --- Cutoff Attack: How Much of the Committee Survives?}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig05_cutoff_overlap.pdf}%
+{Cutoff attack: average overlap with the honest committee. Overlap is the
+fraction of the honest committee that survives in the post-manipulation
+committee, averaged over trials.}{fig:cutoff_overlap}
+
+\textbf{What is plotted.} Overlap is a smoother metric than ``did anything
+change?''. If the honest committee is \(\{A,B,C\}\) and the post-attack
+committee is \(\{A,B,D\}\), the overlap is \(2/3 \approx 0.67\).
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Orange curves collapse quickly.} Under evaluative voting,
+        overlap drops from \(1.0\) towards the ``changed committee''
+        \emph{ceiling}
+        \[
+          \frac{k-1}{k} \;=\; 1 - \frac{1}{k},
+        \]
+        which is the largest overlap you can have when the committee is not
+        the honest committee. This is \(0.500\) at \(k=2\), \(0.667\) at
+        \(k=3\), and rises towards \(1\) as \(k \to m\).
+  \item \textbf{The true disjoint-committee floor} (when the new committee
+        shares nobody with the honest one) is
+        \[
+          \frac{\max(0,\,2k - m)}{k},
+        \]
+        which is zero for all \(k \le m/2\) and only becomes positive at
+        \(k = 6, 7, 8, 9\) in the \(m = 10\) build. Observed minima in the
+        \(m = 10\) cutoff-attack data are \(0.138\) (\(k = 2\), Shapley) and
+        \(0.185\) (\(k = 2\), \(k\)-Median) --- even the harsher bottom attack
+        bottoms out at \(0.125\) --- comfortably above the naive
+        ``\(1 - k/n\)'' guess that appeared in an earlier draft.
+  \item \textbf{Blue and green curves stay near \(1.0\) for a long time.}
+        Under Mallows, the median rules keep a mean overlap above \(0.9\)
+        until about \(23\%\) liars, and \(93\%\) of the individual cells
+        within the first \(20\%\) of manipulators still have overlap
+        \(\ge 0.9\).
+  \item \textbf{Impartial Culture is the harshest environment.} Its
+        culture-averaged curve for the median rules falls from \(0.73\) at
+        \(10\%\) liars to \(0.57\) at \(49\%\), the lowest of the six models,
+        and individual (culture, \(k\)) cells drop below \(0.5\) early ---
+        \(6.7\%\) of IC cells do so within \(1\)--\(15\%\) liars, the minimum
+        being \(0.282\). (The averaged curve itself never falls below
+        \(0.5\).)
+\end{itemize}
+
+\textbf{Take-away.} The median rules protect the whole committee structure,
+not just the target slot.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 6 --- Bottom Attack: Change Rate vs.\ Success Rate Together}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig06_bottom_dual_metric.pdf}%
+{Bottom attack: change rate (solid) vs.\ target success rate (dashed). The
+shaded band spans the range across committee sizes \(k = 2,\dots,9\); the
+solid/dashed lines are the means.}{fig:bottom_dual}
+
+\textbf{What is plotted.} Both metrics on the same axes. The vertical gap
+between a solid line and its dashed counterpart is ``wasted churn'' ---
+committee changes that did not admit the target.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{For evaluative voting, solid and dashed lines sit on top of
+        each other.} No wasted churn.
+  \item \textbf{For the median rules, the two lines separate widely.} The
+        gap is largest at \emph{small} \(k\) and shrinks as \(k\) grows. At
+        \(k = m - 1 = 9\) the gap is exactly zero, because at that size the
+        bottom-attack target is the single candidate the honest committee
+        excludes --- so ``the committee changed'' and ``the target got in''
+        are literally the same event.
+  \item \textbf{Typical gap sizes.} Averaged over the \(m = 10\) data, the
+        change-minus-success gap under the bottom attack is
+        \(23.4\)~pp at \(k = 2\) for \(k\)-Median and \(31.4\)~pp at \(k = 2\)
+        for Shapley, falling to \(0.0\)~pp at \(k = 9\) for both. The worst
+        single cells reach \(67\)~pp (\(k\)-Median) and \(73\)~pp (Shapley);
+        one clean example is P\'olya Urn, \(k = 2\), Shapley, at \(43\%\)
+        manipulation: \(85\%\) change versus \(15\%\) success, a \(70\)~pp
+        gap.
+  \item \textbf{The gap is attack-dependent.} Under the \emph{cutoff} attack,
+        the \(k\)-Median gap is exactly zero in \(100\%\) of cells --- the
+        median rule's churn under the cutoff attack is always a win for the
+        target.
+\end{itemize}
+
+\textbf{Take-away.} Robustness in this simulation is churn that does not
+admit the target, and it is concentrated at small \(k\) under the bottom
+attack.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 7 --- Bottom-Target Success Map}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig07_success_heatmap.pdf}%
+{Bottom-target success map. Rows are culture \(\times\) committee size,
+columns are manipulation bins; one panel per rule. Colour encodes the
+bottom-target success rate (\%). Dark red \(= 100\%\), white \(= 0\%\).}{fig:heatmap}
+
+\textbf{What is plotted.} A colour-coded grid. Each row is one (culture, \(k\))
+pair; each column is a range of manipulation intensities.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Left panel (evaluative voting).} The grid fills in from the
+        left. The \(10\)--\(15\%\) column is \emph{mid-scale} orange-red
+        (mean success \(46\%\); only \(31\%\) of its rows are above \(80\%\)),
+        not deep red. Most rows reach \(80\%\) or more from the
+        \(30\)--\(35\%\) column onward (\(96\%\) of them), and every row is at
+        \(100\%\) from \(35\)--\(40\%\) onward.
+  \item \textbf{Centre panel (\(k\)-Median).} A slower gradient; small \(k\)
+        rows stay pale much longer.
+  \item \textbf{Right panel (\(k\)-Median-Shapley).} The palest of all ---
+        \(25\) of its \(48\) rows are still below \(80\%\) success in the
+        last column, \(13\) of them below \(50\%\), and all of those sit at
+        small \(k\) (\(k \le 8\), mostly \(k \le 5\)).
+  \item \textbf{Reading the rows.} Each culture is a block of eight rows,
+        ordered \(k=2\) (top of block) to \(k=9\) (bottom of block).
+        \emph{Under the bottom attack}, the larger-\(k\) rows are the darker
+        ones --- the reverse of the cutoff attack.
+\end{itemize}
+
+\textbf{Take-away.} The heatmap summarises the whole simulation at a glance:
+saturation moves left-to-right in the order evaluative \(\to\) \(k\)-Median
+\(\to\) Shapley.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 8 --- Tipping Points}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig08_tipping_points.pdf}%
+{Manipulation level (\% of the electorate) at which the bottom target first
+reaches a \(50\%\) success rate. Further right \(=\) more robust. Open
+markers on the right edge indicate the threshold was never reached inside
+the simulated \(1\)--\(49\%\) range.}{fig:tipping}
+
+\textbf{What is plotted.} A single tall panel with one row per
+(culture, \(k\)) pair. On each row there are three markers --- one per rule
+--- placed at the manipulation level where success first reaches \(50\%\).
+Markers pushed to the right edge and drawn with a hollow centre mean ``never
+reached''.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Orange circles cluster to the left.} In the \(m = 10\) build,
+        tipping points span roughly \(2\)--\(32\%\).
+  \item \textbf{Blue squares sit in the middle.} Tipping points of roughly
+        \(5\)--\(42\%\).
+  \item \textbf{Green triangles sit furthest right.} Tipping points of
+        roughly \(7\)--\(49\%\), and six of the \(48\) rows are hollow ---
+        all at \(k = 2\) or \(k = 3\).
+  \item \textbf{The horizontal spread between the three markers is the
+        robustness gain.} On almost every row, the order from left to right
+        is orange, blue, green.
+\end{itemize}
+
+\textbf{Take-away.} This is the cleanest single-picture summary of the rule
+ordering.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 9 --- Aggregate Summary}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig09_aggregate_summary.pdf}%
+{Aggregate summary: mean over the six preference models. Rows are the two
+attacks; columns are the two metrics. Line style and marker encode committee
+size \(k\).}{fig:aggregate}
+
+\textbf{What is plotted.} A \(2 \times 2\) grid (rows \(=\) attacks, columns
+\(=\) metrics) with the culture differences averaged away. This strips out
+the noise and shows the underlying shape.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Top row} \(=\) cutoff attack. \textbf{Bottom row} \(=\)
+        bottom attack. The bottom-attack curves are always shifted right ---
+        the bottom attack is harder.
+  \item \textbf{Left column} \(=\) change rate. \textbf{Right column} \(=\)
+        success rate. The right column curves are lower for the median rules.
+  \item \textbf{The bottom-right panel} is the money shot: evaluative voting
+        averages \(92\%\) success at \(30\%\) liars, \(99\%\) at \(35\%\) and
+        \(100\%\) at \(49\%\), while the Shapley rule is still at \(81\%\)
+        overall at \(49\%\) --- \(52\%\) at \(k = 2\), \(99\%\) at \(k = 9\).
+  \item \textbf{Fan shape within each colour} \(=\) effect of committee size.
+        Under the bottom attack larger \(k\) sits higher; under the cutoff
+        attack the fan flips direction.
+\end{itemize}
+
+\textbf{Take-away.} Averaged over cultures, the median advantage is still
+large and consistent.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 10 --- Change vs.\ Success Gap}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig10_change_vs_success_gap.pdf}%
+{Bottom attack: committee change rate minus target success rate (percentage
+points). Zero \(=\) the target enters whenever the committee changes;
+positive \(=\) committee changed but the target failed.}{fig:gap}
+
+\textbf{What is plotted.} The vertical gap from Figure~\ref{fig:bottom_dual}
+on its own, as a function of manipulation.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{Orange line sits on zero.} For evaluative voting, every change
+        helps the liars.
+  \item \textbf{Blue and green lines form humps.} In the \(m = 10\) data the
+        per-curve humps peak at a median of \(47\)~pp (\(k\)-Median) and
+        \(37\)~pp (Shapley), most of them in the \(40\)--\(60\)~pp band
+        (\(43\%\) and \(36\%\) of curves). The worst single cells reach
+        \(67\)~pp (\(k\)-Median) and \(73\)~pp (Shapley).
+  \item \textbf{The humps are largest in the disordered models, not
+        smallest.} This is the reverse of an earlier draft's claim. Mallows
+        gives by far the smallest hump in all three datasets (mean peak
+        \(2.5\)--\(8.4\)~pp, against \(14\)--\(48\)~pp for the other five
+        models); Impartial Culture has the largest mean peak at \(m=5\)
+        (\(22.3\)~pp) and \(m=7\) (\(34.4\)~pp), and at \(m=10\) the largest
+        peaks are shared between Impartial Culture, P\'olya Urn and 2D
+        Euclidean (\(48\)--\(50\)~pp). Intuitively, a structureless electorate
+        is the easiest one for the median rules to reshuffle without helping
+        the target.
+  \item \textbf{Humps shrink as \(k\) grows.} In the \(m = 10\) data the
+        largest gaps sit at \(k = 2\)--\(3\) (\(67\)~pp for \(k\)-Median,
+        \(73\)~pp for Shapley) and the gap is exactly zero at
+        \(k = m - 1 = 9\).
+\end{itemize}
+
+\textbf{Take-away.} The figure explains \emph{why} the median rules are more
+robust: they can absorb the attack without letting it through, and this
+mechanism is strongest for small committees and for the most disordered
+electorates.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 11 --- Median Advantage}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig11_median_advantage.pdf}%
+{Bottom attack: robustness gain of the median rules over evaluative voting.
+Positive \(=\) median rules keep the bottom target out more often than
+evaluative voting.}{fig:advantage}
+
+\textbf{What is plotted.} Direct rule-versus-rule comparison: how much more
+often does the median rule block the target, compared to evaluative voting?
+The \(y\)-axis is
+\[
+  \text{success}(\text{evaluative}) - \text{success}(\text{median}),
+\]
+in percentage points.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{The advantage peaks in the mid-range of manipulation.}
+        In the \(m = 10\) data the Shapley-over-evaluative advantage peaks
+        between \(14\%\) (at \(k = 9\)) and \(36\%\) (at \(k = 2\)) liars.
+        This is the region where the median rules are most useful.
+  \item \textbf{The advantage declines after the peak} because evaluative
+        voting saturates at \(100\%\) success while the median rules
+        eventually catch up.
+  \item \textbf{Small \(k\) gives the biggest advantage.} Solid dark lines
+        (small \(k\)) sit highest.
+  \item \textbf{Shapley is better than \(k\)-Median.} In each colour, the
+        dashed line (Shapley) sits above the solid line (\(k\)-Median).
+  \item \textbf{Impartial Culture gives the \emph{smallest} advantage here.}
+        This is the opposite direction from Figure~\ref{fig:gap}. Both are
+        correct: IC has the largest \emph{absolute} churn gap, but the
+        smallest \emph{rule-to-rule} advantage, because even evaluative
+        voting is already saturated at \(100\%\) by the time the median rules
+        fall short.
+\end{itemize}
+
+\textbf{Take-away.} Median rules win the most exactly where it matters ---
+in the mid-range of manipulation, at small committee sizes.
+
+% ---------------------------------------------------------------------------
+\subsection{Figure 12 --- Crossing vs.\ Committee Size}
+% ---------------------------------------------------------------------------
+
+\reportfig{fig12_crossing_vs_committee_size.pdf}%
+{How much manipulation is needed to elect the bottom candidate? \(x\)-axis:
+committee size \(k\). \(y\)-axis: manipulation level at which the bottom
+target reaches \(50\%\) success. Higher \(=\) harder to manipulate, so
+higher is better.}{fig:crossing}
+
+\textbf{What is plotted.} A compact six-panel summary, one panel per culture.
+On each panel, the three curves show the \(50\%\) tipping point (from
+Figure~\ref{fig:tipping}) as a function of committee size.
+
+\textbf{What to look for.}
+\begin{itemize}
+  \item \textbf{All curves slope downward.} Under the \emph{bottom} attack,
+        larger committees are easier to manipulate. (In the \(m = 10\) data
+        every one of the \(108\) tipping-point curves is non-increasing in
+        \(k\).)
+  \item \textbf{Orange is uniformly the lowest curve.} Evaluative voting is
+        the easiest to manipulate at every \(k\).
+  \item \textbf{Green is uniformly the highest.} Shapley is the hardest to
+        manipulate at every \(k\).
+  \item \textbf{The vertical gap shrinks as \(k\) grows.} In the \(m = 10\)
+        data the Shapley-minus-evaluative gap falls from \(\sim24\)~pp at
+        \(k = 2\) to \(\sim16\)~pp at \(k = 9\).
+  \item \textbf{Impartial Culture is the flattest panel for the two
+        non-Shapley rules.} There the evaluative and \(k\)-Median curves move
+        by less than one percentage point per step (\(0.9\)~pp and \(0.7\)~pp
+        at \(m = 10\), against \(2.5\)--\(5.5\)~pp in the other panels),
+        because in a random electorate the bottom target is admitted early
+        for every \(k\). Only the Shapley curve still spans a wide range
+        there (\(34\%\) at \(k = 2\) down to \(7\%\) at \(k = 9\)).
+\end{itemize}
+
+\textbf{Take-away.} Committee size is a trade-off: small committees are
+harder to manipulate under the bottom attack, and median rules give the most
+protection when the committee is small.
+
+% ===========================================================================
+\section{The Committee-Size Contradiction, Resolved}
+\label{sec:contradiction}
+% ===========================================================================
+
+Earlier drafts contained two statements that looked contradictory:
+
+\begin{itemize}
+  \item ``small \(k\) is easier to manipulate'' (from the cutoff curves), and
+  \item ``larger \(k\) is easier to manipulate'' (from the bottom curves).
+\end{itemize}
+
+Both are correct, but only when each is scoped to a particular attack.
+
+\begin{itemize}
+  \item \textbf{Cutoff attack.} The target is the candidate ranked \(k+1\).
+        For small \(k\), that candidate is close to the middle of the
+        ranking and needs only a little push to enter; for large \(k\), the
+        target is deeper in the honest ranking and harder to move. So under
+        the cutoff attack, \emph{small committees are the more exposed ones}.
+  \item \textbf{Bottom attack.} The target is the candidate ranked \(m\).
+        For small \(k\), the committee is small and the target is far away;
+        for large \(k\), the committee is large and the target only has to
+        overtake \(m - k\) competitors. So under the bottom attack,
+        \emph{large committees are the more exposed ones}.
+\end{itemize}
+
+Every ``larger \(k\)'' or ``smaller \(k\)'' statement in this report is
+therefore made with the attack named explicitly.
+
+% ===========================================================================
+\section{The Story the Figures Tell Together}
+% ===========================================================================
+
+Putting all twelve figures side by side, the following messages come out.
+
+\begin{enumerate}
+  \item \textbf{The rule ordering is almost always preserved.}
+        In the \(m = 10\) audit, the ordering
+        \[
+          k\text{-Median-Shapley}
+          \;>\;
+          k\text{-Median}
+          \;>\;
+          \text{Evaluative Voting}
+        \]
+        holds in roughly \(90\)--\(100\%\) of success cells (worst pairings
+        break in \(4\)--\(10\%\) of cells, and the breaks sit at low
+        manipulation intensities, below about \(15\%\) liars). It is a strong
+        tendency, not an absolute law.
+
+  \item \textbf{Evaluative change equals success exactly.} In \(100\%\) of
+        cells, both attacks, all three datasets, the change rate and the
+        success rate of evaluative voting are identical (gap \(0.0\)~pp).
+
+  \item \textbf{The change--success gap depends on the attack and on \(k\).}
+        Under the bottom attack the gap is large at small \(k\) (up to
+        \(\sim70\)~pp) and \emph{exactly zero at \(k = m-1\)}, because at
+        that size the target is the only candidate excluded by the honest
+        committee. Under the cutoff attack the gap is exactly zero for
+        \(k\)-Median in \(100\%\) of cells.
+
+  \item \textbf{The bottom attack is harder than the cutoff attack.} The
+        bottom-attack curves shift right relative to cutoff for the success
+        metric in \(100\%\) of cells (every culture, every rule); for the
+        change metric the shift holds in \(98\)--\(100\%\) of cells.
+
+  \item \textbf{Culture matters.} Impartial Culture is the harshest
+        environment for every rule; Mallows is the most forgiving, followed
+        by Plackett--Luce. Averaged over the first \(15\%\) of manipulators at
+        \(m = 5\), the evaluative change rate is \(90.5\%\) under Impartial
+        Culture against \(53.5\%\) under Mallows and \(48.9\%\) under
+        Plackett--Luce.
+
+  \item \textbf{The Shapley rule is the strongest.} Across the twelve
+        figures, the \(k\)-Median-Shapley rule provides the most protection,
+        especially at small \(k\) and intermediate manipulation intensities.
+\end{enumerate}
+
+% ===========================================================================
+\section{Figure Index}
+% ===========================================================================
+
+\begin{table}[H]
+  \centering
+  \caption{Index of all figures produced by Simulation~1. Each figure is
+  placed alone on its own page, at the same width and with the same caption
+  style, so the reader can flip through them quickly.}
+  \label{tab:figindex}
+  \begin{tabular}{@{}clp{6.5cm}@{}}
+    \toprule
+    \# & File & Short description \\
+    \midrule
+    1  & \texttt{fig01\_cutoff\_change\_rate.pdf}          & Cutoff attack, change rate \\
+    2  & \texttt{fig02\_cutoff\_success\_rate.pdf}         & Cutoff attack, success rate \\
+    3  & \texttt{fig03\_bottom\_change\_rate.pdf}          & Bottom attack, change rate \\
+    4  & \texttt{fig04\_bottom\_success\_rate.pdf}         & Bottom attack, success rate \\
+    5  & \texttt{fig05\_cutoff\_overlap.pdf}               & Cutoff attack, average overlap \\
+    6  & \texttt{fig06\_bottom\_dual\_metric.pdf}          & Bottom attack, change vs.\ success \\
+    7  & \texttt{fig07\_success\_heatmap.pdf}              & Bottom-target success heatmap \\
+    8  & \texttt{fig08\_tipping\_points.pdf}               & Tipping points \\
+    9  & \texttt{fig09\_aggregate\_summary.pdf}            & Mean over cultures \\
+    10 & \texttt{fig10\_change\_vs\_success\_gap.pdf}      & Change minus success gap \\
+    11 & \texttt{fig11\_median\_advantage.pdf}             & Median advantage over evaluative \\
+    12 & \texttt{fig12\_crossing\_vs\_committee\_size.pdf} & Tipping point vs.\ committee size \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}
