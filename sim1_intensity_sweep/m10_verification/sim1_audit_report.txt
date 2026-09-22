@@ -1,0 +1,34 @@
+AUDIT REPORT - Simulation 1 (manipulation intensity 1%-49%)
+n = 100 voters fixed, m = 10 candidates, k = [2, 3, 4, 5, 6, 7, 8, 9], trials per cell = 200
+rows = 14112 (cultures x k x intensities x attacks x rules)
+------------------------------------------------------------------------------
+  [PASS] result rows complete  ->  14112 of 14112
+  [PASS] all six preference cultures  ->  6 cultures
+  [PASS] all committee sizes k = 2,3,4,5,6,7,8,9  ->  k = [2, 3, 4, 5, 6, 7, 8, 9]
+  [PASS] every integer intensity 1% ... 49%  ->  49 levels
+  [PASS] both attacks present  ->  ['Bottom', 'Cutoff']
+  [PASS] all three rules present  ->  3 rules
+  [PASS] no duplicate cells
+  [PASS] electorate is always 100 voters  ->  min 51 honest, max 49 manipulators
+  [PASS] honest count inside 51 ... 99
+  [PASS] no missing values
+  [PASS] all rates inside [0, 100]  ->  max rate 100.0%
+  [PASS] overlap inside [0, 1]  ->  range 0.125 ... 1.000
+  [PASS] evaluative voting: change rate == success rate (both attacks)  ->  max |diff| = 0.00e+00 pp
+  [PASS] cutoff attack: k-Median change rate == success rate (>= 99% of cells)  ->  100.0% of the 2352 cells match exactly; largest excess 0.0 pp
+  [INFO] cutoff attack, Shapley: change minus success up to 34.5 pp (expected: Shapley can reshuffle the committee without admitting the target)
+  [INFO] bottom attack, k-Median: change minus success up to 67.0 pp
+  [INFO] bottom attack, Shapley: change minus success up to 73.0 pp
+  [PASS] Cutoff / Success_Rate: Shapley <= Median  ->  96.0% of the 2352 cells
+  [PASS] Cutoff / Success_Rate: Median <= Evaluative  ->  100.0% of the 2352 cells
+  [PASS] Cutoff / Change_Rate: Shapley <= Median  ->  94.6% of the 2352 cells
+  [PASS] Bottom / Success_Rate: Shapley <= Median  ->  99.3% of the 2352 cells
+  [PASS] Bottom / Success_Rate: Median <= Evaluative  ->  90.5% of the 2352 cells
+  [PASS] Bottom / Change_Rate: Shapley <= Median  ->  90.5% of the 2352 cells
+  [INFO] Cutoff attack, change rate: k-Median <= Evaluative in 100.0% of the 2352 cells (largest excess 0.0 pp)
+  [INFO] Bottom attack, change rate: k-Median <= Evaluative in 67.7% of the 2352 cells (largest excess 70.5 pp)
+  [PASS] Cutoff / success rate non-decreasing as manipulation grows  ->  94.0% of consecutive steps
+  [PASS] Bottom / success rate non-decreasing as manipulation grows  ->  97.2% of consecutive steps
+  [PASS] every culture x k reacts to the attack (success exceeds 50% somewhere)  ->  worst case maximum success = 100.0%
+------------------------------------------------------------------------------
+OVERALL: ALL CHECKS PASSED
